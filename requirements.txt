@@ -1,0 +1,2 @@
+colorama==0.4.1
+mimesis==3.0.0

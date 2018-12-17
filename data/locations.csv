@@ -1,0 +1,5 @@
+grocery_store,urban,suburban
+gas_station,urban,suburban,rural
+farm,rural
+apartment_building,urban
+house,suburban

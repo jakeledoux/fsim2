@@ -1,0 +1,5 @@
+barn,farm
+car,farm,house,apartment_building,gas_station,grocery_store,street
+garbage_can,farm,house,apartment_building,gas_station,grocery_store,street
+pantry,house,apartment_building,farm
+shelf,gas_station,grocery_store
