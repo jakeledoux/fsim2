@@ -1,0 +1,50 @@
+# Game text lines
+# Uses proprietary Clem syntax
+# Line ID | Line text (<blah> for optional text, <nah/sure/whatever> for random choices, {x} for variables)| [requirements...] (1/2 for either/or requirements)
+
+##### PLEASE END ALL TEXT SECTIONS WITH PUNCTUATION! ##########################################################################################################
+(Jake) [
+	(Drink) [
+		drink.desperation | NAME1 drinks from the <sewer / street drainage> out of desperation. | biome:urban
+		drink.desperation | NAME1 drinks from a puddle out of desperation.
+		drink.desperation | NAME1 drinks from a pond out of desperation. | biome:rural / biome:suburban
+		drink.desperation | NAME1 drinks from a river out of desperation. | biome:rural
+		drink.refill | NAME1 <refills/fills up> HIS1 {item} in the <sewer / street drainage> | biome:urban
+		drink.refill | NAME1 <refills/fills up> HIS1 {item} in a puddle.
+		drink.refill | NAME1 <refills/fills up> HIS1 {item} in a pond. | biome:rural / biome:suburban
+		drink.refill | NAME1 <refills/fills up> HIS1 {item} in a river. | biome:rural
+		drink.consume | NAME1 drinks {water_amount} units of water <from HIS1 inventory>.
+	]
+	(Scavenge) [
+		scavenge.too_heavy | But HE1 can't carry it.
+		scavenge.too_heavy | But it's too heavy <<for HIM1> to carry>.
+		scavenge.too_heavy | But HE1 left it behind because HIS1 spindly little arms were too weak to carry it.
+		scavenge.food_or_drink | NAME1 <searches / checks> a {container} <in hopes of / for> {reason}.
+		scavenge.general | NAME1 investigates a {container}.
+		scavenge.inventory | NAME1 <searches / checks> a {container} for <supplies / resources>.
+		scavenge.found | HE1 found one {item} <inside>!
+		scavenge.found | There was one {item} inside.
+		scavenge.found | NAME1 now has one extra {item}.
+		scavenge.found_amount | HE1 found {item} x{amount}.
+		scavenge.empty | There's nothing inside.
+		scavenge.empty | HE1 found nothing but <cobwebs/dust/empty beer bottles/used toilet paper/dead ants>.
+		scavenge.empty | All HE1 found was <a few moldy chips/some unidentifiable object/an emoji pillow/a cracked CD>.
+	]
+	(Explore) [
+		explore.wander | NAME1 wanders to {location}.
+		explore.venture | NAME1 ventures out of the city <and into/to> {location} <located> in {biome}. | biome:urban
+		explore.venture | NAME1 ventures out of the backwoods <and into/to> {location} <located> in {biome}. | biome:rural
+		explore.venture | NAME1 ventures out of the suburbs <and into/to> {location} <located> in {biome}. | biome:suburbs
+		explore.venture | NAME1 ventures out to {location} in {biome}.
+		explore.flee | NAME1 flees to {location}.
+	]
+	(Attack) [
+		attack.generic | NAME1 slashes NAME2 with HIS1 {weapon}. | item:weapon:melee
+		attack.generic | NAME1 stabs NAME2 with HIS1 {weapon}. | item:weapon:melee
+		attack.generic | NAME1 shoots NAME2 with HIS1 {weapon}. | item:weapon:handgun/item:weapon:rifle/item:weapon:bow
+		attack.generic | NAME1 pops a cap off in NAME2 using HIS1 {weapon}. | item:weapon:handgun/item:weapon:rifle
+		attack.insult | NAME1 attempts to intimidate NAME2 with HIS1 physical prowess.
+		attack.insult |NAME1 insults NAME2.
+		attack.insult |NAME1 flashes their <ammoless> pistol at NAME2.| weapon:hangun
+	]
+]

@@ -1,0 +1,7 @@
+# Items must be added to items.csv before their weapon stats can be added here.
+
+# Item ID, Class, Damage, Ammo Type
+axe,melee,40,none
+revolver,handgun,80,bullet
+pistol,handgun,65,bullet
+bow,bow,30,arrow

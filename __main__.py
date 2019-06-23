@@ -1,26 +1,37 @@
-from fUtils import *
-from fActions import *
+import utils
+import actions
 
-universe = world(1, 1)
-universe.players.append(NPC('Jamie', 1))
-universe.players.append(NPC('Barbara', 0))
-universe.players.append(NPC('Steph', 0))
-
-for player in universe.players:  # Populate players
-    player.random_location(universe)
-
-# print(universe.players[0].location.items)
+DEBUG_PRINTS = 0
+DEBUG_SPEED = False
 
 while True:
-    # break # Remove if gameplay is desired.
-    clear()
-    # MORNING
-    for player in universe.players:  # Each player...
-        # Remove dead player
-        if player.dead:
-            universe.players.remove(player)
-            continue
+    universe = utils.World(1, 1)
+    universe.players.append(utils.NPC('Jamie', 1))
+    universe.players.append(utils.NPC('Barbara', 0))
+    universe.players.append(utils.NPC('Steph', 0))
+
+    for player in universe.players:  # Populate players
+        player.random_location(universe)
+
+    while True:
+        # break # Remove if gameplay is desired.
+        utils.clear()
+        # MORNING
+        if len(universe.players) == 0:
+            print("Everyone has died. The end.")
+            break
         else:
-            player.step()
-        act(player, debug=True)
-    input("Press enter...")
+            for player in universe.players:  # Each player...
+                # Remove dead player
+                player.step()
+                if player.dead:
+                    universe.players.remove(player)
+                    utils.printd(player.death_message, [player])
+                    continue
+                else:
+                    actions.act(player, universe, debug=DEBUG_PRINTS)
+                print()  # Creates newline, should be removed when GUI is worked on.
+        if not DEBUG_SPEED:
+            input("Press enter...")
+    if not DEBUG_SPEED:
+        break

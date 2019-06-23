@@ -1,4 +1,6 @@
-garbage_can,garbage can
+# ID, [In-game Names...]
+
+# Locations ###############################################
 grocery_store,Whole Foods Market,Kroger,Costco,Walmart
 gas_station,Exxon,7-Eleven,Mobil,Sunoco
 farm_prefix,,Old Man,Lucky,Family
@@ -7,3 +9,10 @@ apartment_building,Apartments,Condos
 street,Street,Road,Street,Road,Turnpike,Way,Lane,Parkway
 suburban,Estates,Town,Village,Suburbs,Hills
 rural,Swamp,Mountain,Valley,Plains,Countryside
+
+# Containers ##############################################
+barn,barn
+car,car,van,truck
+garbage_can,garbage can, dumpster
+pantry,pantry,cabinet
+shelf,shelf,rack,display

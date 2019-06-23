@@ -1,0 +1,10 @@
+# Death Note mod
+
+(Death Note) [
+	(Mods) [
+		mods.death_note.general | NAME1 <scribbles/writes> NAME2's name in a mysterious black book.
+		mods.death_note.suicide | NAME1 <scribbles/writes> HIS1 own name in the Death Note.
+		mods.death_note.death | NAME1 dies of <unknown/mysterious> causes.
+		mods.death_note.death | NAME1 dies of for seemingly no reason <whatsoever>.
+	]
+]

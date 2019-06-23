@@ -1,6 +1,15 @@
-apple,Apple,food,7,0.5
-berries,Handful of berries,food,3,0.2
-granola_bar,Granola bar,food,10,0.2
+# ID, In-game Name, Type, Effectiveness, Weight
+apple,Apple,food,25,0.5
+berries,Handful of berries,food,10,0.2
+granola_bar,Granola bar,food,20,0.2
+beef_jerky,Beef jerky,food,20,0.2
+canned_beans,Can of beans,food,50,1.5
+chips,Bag of chips,food,30,0.5
 canteen,Canteen,drink,32,.1
 water_bottle,Plastic water bottle,drink,16,0
-axe,Axe,tool,10,2
+axe,Axe,tool,10,5
+revolver,Revolver,tool,-1,2.5
+pistol,Pistol,tool,-1,2
+bullet,Bullet,ammo,-1,0.1
+bow,Bow,tool,-1,2.5
+arrow,Arrow,ammo,-1,0.1
