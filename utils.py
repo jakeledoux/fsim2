@@ -1,4 +1,5 @@
-from typing import List
+import importlib
+from typing import List, Dict, Tuple
 import colorama
 import mimesis
 import os
@@ -13,36 +14,68 @@ colorama.init(autoreset=True)
 re_line_op = re.compile("<[^>]+>")
 re_line_ext = re.compile("<([^>]+)>")
 re_end_punct = re.compile("[.,!?;]$")
+re_parens_int = re.compile("\((\d+)\)")
+re_parens_str = re.compile("\((\D+)\)")
 
 BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 class Line(object):
-    def __init__(self, line_id, line_text, line_requirements):
+    def __repr__(self):
+        return f"<Line: {self.id}| Req: {self.requirements}| Act: {self.actions}| Ret: {self.returns}>"
+
+    def __init__(self, line_id: str, line_text: str, line_requirements: List[str],
+                 line_actions: List[str], line_returns: Dict[str, str]):
         self.id = line_id
         self.text = line_text
         self.requirements = line_requirements
+        self.actions = line_actions
+        self.returns = line_returns
+        # print(self)
 
 
-def rand_line(*args, **kwargs):
-    """ Alias for random.choice(get_lines()).text
+def get_paren_int(intext):
+    return int(re_parens_int.search(intext).group(1))
+
+
+def rand_line(*args, **kwargs) -> (str, Dict[str, str]):
     """
-    return random.choice(get_lines(*args, **kwargs)).text
+    Selects a relevant line and executes its actions
+    More or less an alias for random.choice(get_lines()).text, see get_lines() documentation.
+
+    :param args: Passes to get_lines()
+    :param kwargs: Passes to get_lines()
+    """
+    line = random.choice(get_lines(*args, **kwargs))
+    # Parse actions:
+    try:
+        player: NPC = args[1][0]
+    except IndexError:
+        player = None
+    for action in line.actions:
+        act_type, act_value = action.split(":")
+        if act_type == "consume":
+            if act_value.startswith("ammo"):
+                ammo_amount = get_paren_int(act_value)
+                if kwargs.get('item') is not None:
+                    weapon = kwargs.get('item')
+                else:
+                    weapon = player.get_weapon(['rifle', 'handgun', 'bow'])
+                player.consume_ammo(weapon.ammo_type, ammo_amount)
+    return line.text, line.returns
 
 
 def get_lines(line_id: str, players=None, item=None) -> List[Line]:
     """
-    :param line_id:
-    The category of text to look for in the list.
-    :param players:
-    List of players relevant to this line. If omitted it will only return lines that don't have filters.
-    :param item:
-    For specific filters based on single objects selected by the game.
-    :return:
-    List of line objects meeting criteria.
+    Filters game lines by line_id and requirements.
+
+    :param line_id: The category of text to look for in the list.
+    :param players: List of players relevant to this line. If omitted it will only return lines that don't have filters.
+    :param item: For specific filters based on single objects selected by the game.
+    :return: List of line objects meeting criteria.
     """
     # Most filtering will be based on subject player
-    player = players[0] if players is not None else None
+    player: NPC = players[0] if players is not None else None
     out_lines = []
     # Iterate through all lines with same line_id (line_ids look like "drink.desperation")
     for line in lines[line_id]:
@@ -60,12 +93,22 @@ def get_lines(line_id: str, players=None, item=None) -> List[Line]:
                         sub_results.append(req_value == ('female', 'male', 'other')[player.gender])
                     elif req_type == "weapon":
                         # Look through weapons in inventory and see if any match the specified type
-                        sub_results.append(any(inv_item.weapon_type == req_value for inv_item in player.inventory
-                                               if inv_item.is_weapon))
+                        if req_value.startswith("loaded"):
+                            # Remove loaded keyword
+                            req_value = req_value.split(":")[1]
+                            # Get loaded weapons matching type
+                            sub_results.append(len(player.usable_weapons([req_value])) > 0)
+                        else:
+                            sub_results.append(any(inv_item.weapon_type == req_value for inv_item in player.inventory
+                                                   if inv_item.is_weapon))
                     elif req_type == "item":
                         req_type, req_value = req_value.split(":")
                         if req_type == "weapon":
                             sub_results.append(item.weapon_type == req_value)
+                    elif req_type == "player":
+                        if req_value in ("arm", "arms", "leg", "legs", "head"):
+                            # Limb checks
+                            sub_results.append(player.poll_limbs()[req_value])
                 req_results.append(any(sub_results))
 
             # If all requirement booleans are true,
@@ -90,8 +133,19 @@ def load_lines(*directory):
                 continue
             # Has content
             elif line != "":
+                # Split by columns and strip whitespace
                 line_data = [column.strip() for column in line.split("|")]
-                line_obj = Line(line_data[0], line_data[1], line_data[2:])
+                # Get positional column data
+                line_id, line_text, line_etc = line_data[0], line_data[1], line_data[2:]
+                # Get all filter/requirement lines, i.e. not 'do:' or 'return:'
+                line_requirements = [req for req in line_etc
+                                     if not (req.startswith("do:") or req.startswith("return:"))]
+                # Get all action lines, e.g. 'do:'
+                line_actions = [act.strip("do:") for act in line_etc if act.startswith("do:")]
+                # Get all return lines, e.g. 'return:' as dict of {category: value}
+                line_returns = [ret.strip("return:") for ret in line_etc if ret.startswith("return:")]
+                line_returns = {ret.split(":")[0].strip(): ret.split(":")[1].strip() for ret in line_returns}
+                line_obj = Line(line_id, line_text, line_requirements, line_actions, line_returns)
                 try:
                     output[line_data[0]].append(line_obj)
                 except KeyError:
@@ -116,7 +170,10 @@ def clear():
 
 
 def does_evil(player):
-    # LEGACY DO NOT USE
+    """ THIS IS LEGACY CODE. DO NOT USE IT. IT *WILL* BREAK.
+
+        Once this function is confirmed to not appear anywhere in the game, delete it.
+    """
     evil = random.choice([False, True])  # Roll for good or evil action
     if not evil and player.mean:  # Mean players get a second chance to be evil
         evil = random.choice([False, True])
@@ -127,6 +184,11 @@ def printd(intext, players=(), trailing=False, leading=False, **kwargs):
     """ I still don't know why I originally called it printd instead of printf.
         The world may never know.
     """
+    # Handle line returns
+    if type(intext) is tuple:
+        intext, line_returns = intext
+    else:
+        line_returns = None
 
     # Get both ends of string with pattern removed
     # While there are patterns in the text
@@ -188,6 +250,9 @@ def printd(intext, players=(), trailing=False, leading=False, **kwargs):
     # Output formatted string
     print(intext)
 
+    # Return line's return arguments
+    return line_returns
+
 
 def load_csv(filename):
     with open(filename, "r") as f:
@@ -241,6 +306,7 @@ class World:
         self.biomes = []
         self.players = []
         self.size = size
+        self.day = 0
 
         # Generate 2d array of biomes
         for x_coord in range(size):
@@ -277,9 +343,9 @@ class Location:
 
     def __init__(self, type_id, parent_biome, street=False):
 
-        self.players = []
+        self.players: List[NPC] = []
         self.containers = []
-        self.biome = parent_biome
+        self.biome: Biome = parent_biome
 
         if street:
             self.type = "street"
@@ -397,14 +463,14 @@ class NPC:
     def __init__(self, name, gender, kindness=None, bicurious=None):
 
         # Identity
-        self.name = name  # String
-        self.gender = gender  # Int - 0:female, 1:male
-        self.relations = {}  # Dict - {"Other NPC's Name" : <Relation object>}
+        self.name: str = name  # String
+        self.gender: int = gender  # Int - 0:female, 1:male
+        self.relations: Dict[str, Relation] = {}  # Dict - {"Other NPC's Name" : <Relation object>}
         # Example: {"Charlie":['friendly', 10], "Danny":['friendly', -50], "Susan":['romantic', 39]}
-        self.kindness = kindness if kindness is not None else random.randint(0, 100)  # Int - [0-100]
-        self.bicurious = bicurious if bicurious is not None else (
+        self.kindness: int = kindness if kindness is not None else random.randint(0, 100)  # Int - [0-100]
+        self.bicurious: bool = bicurious if bicurious is not None else (
                 random.randrange(10) == 0)  # Bool (Defaults to 1 in 10 chance)
-        self.extroversion = round(random.random(), 3)
+        self.extroversion: float = round(random.random(), 3)
 
         # Needs
         self.hunger = random.randrange(10)  # Int - [0-100]
@@ -412,17 +478,22 @@ class NPC:
         self.loneliness = random.randrange(10, 80) * self.extroversion  # Int - [0-100]
         self.boredom = random.randrange(20, 40)
 
-        self.inventory = []  # List - [Item(),Item(),Item()]
+        self.inventory: List[Item] = []  # List - [Item(),Item(),Item()]
         self.strength = 50 if self.gender == 1 else 40  # Int - How much the NPC can carry without a Container
-        self.location = None  # Location() - Must be defined before start of game
+        self.location: Location = None  # Location() - Must be defined before start of game
 
         self.unconscious = False
         self.dead = False
         self.days_to_live = -1  # If positive it will count down until zero, and they will die.
         self.death_message = ""
+        self.death_day = -1
+
+        self.kills = 0
 
         # Dict - Int - >=10:nominal,0-10:broken,<=-1:dismembered
-        self.limbs = {'l_arm': 20, 'r_arm': 20, 'l_leg': 20, 'r_leg': 20, 'head': 20}
+        # self.limbs = {'l_arm': 20, 'r_arm': 20, 'l_leg': 20, 'r_leg': 20, 'head': 20}
+        # Actually maybe not that ^
+        self.limbs = {'l_arm': 100, 'r_arm': 100, 'l_leg': 100, 'r_leg': 100, 'head': 100}
 
     def step(self):  # Iterate the player's needs (Should be called once per cycle/day)
         if self.days_to_live > 0:
@@ -473,17 +544,44 @@ class NPC:
 
         return amount
 
-    def damage(self, amount, limb=None):
+    def damage(self, amount: int, limb: str = None):
+        """
+        Deal damage to NPC.
+
+        :param amount: Amount of damage to inflict
+        :param limb: Limb to damage - 'l_arm', 'r_arm', 'l_leg', 'r_leg', or 'head'
+        :return: Nothing at the moment
+        """
         if limb is None:
             limb = random.choice(['l_arm', 'r_arm', 'l_leg', 'r_leg', 'head'])
         self.limbs[limb] -= amount
-        if self.limbs['head'] in range(1, 10):
+        if self.limbs['head'] in range(1, 20):
             self.unconscious = True
+            printd(rand_line("status.knockout", [self]), [self])
         elif self.limbs['head'] < 1:
             self.die("NAME1 dies from wounds to the head.")
 
         # Calculate strength loss if arms are damaged
         self.strength = 10 + (self.limbs['l_arm'] // 10) * 10 + (self.limbs['r_arm'] // 10) * 10
+
+    def poll_limbs(self) -> Dict[str, bool]:
+        """
+        Identifies whether sections of the body work or not
+
+        :return: Dictionary with "arm", "arms", "leg", "legs", "head" and their state as a bool.
+        """
+        limb_cond = {limb: limb_cond > 40 for limb, limb_cond in self.limbs.items()}
+        conditions = {"arm": limb_cond['l_arm'] or limb_cond['r_arm'],
+                      "arms": limb_cond['l_arm'] and limb_cond['r_arm'],
+                      "leg": limb_cond['l_leg'] or limb_cond['r_leg'],
+                      "legs": limb_cond['l_leg'] and limb_cond['r_leg'],
+                      "head": limb_cond['head']}
+        return conditions
+
+    def wake_up(self):
+        # Wake up and heal head a little
+        self.unconscious = False
+        self.limbs['head'] = 30
 
     def move(self, new_location):
         if self.location is not None:
@@ -559,7 +657,7 @@ class NPC:
         return oz_drank
 
     def give(self, thing, other_npc):
-        if other_npc.inventory.pickup(thing):
+        if other_npc.pickup(thing):
             self.inventory.remove(thing)
             return True
         else:
@@ -597,15 +695,20 @@ class NPC:
                             return True
         return False
 
-    def usable_weapons(self):
+    def get_weapon(self, weapon_types=[]):
+        return random.choice(self.usable_weapons(weapon_types))
+
+    def usable_weapons(self, weapon_types=[]):
         output = []
         for item in self.inventory:
             if item.is_weapon:
-                if item.requires_ammo:
-                    if self.count_ammo(item.ammo_type) >= 1:
+                # See if weapon matches filter
+                if item.weapon_type in weapon_types or len(weapon_types) == 0:
+                    if item.requires_ammo:
+                        if self.count_ammo(item.ammo_type) >= 1:
+                            output.append(item)
+                    else:
                         output.append(item)
-                else:
-                    output.append(item)
         return output
 
 
@@ -614,17 +717,17 @@ def color(intext, fore_color, bright=False):
 
 
 def load_data(*directory):
+    """
+    Loads csv data files in directory.
+
+    :param directory: String arguments that form a path
+    """
     global item_data
     global weapon_data
     global location_types
     global container_types
     global pronoun_list
     global nouns
-    """
-    :param directory:
-    String arguments that form a path
-    :return:
-    """
     path = os.path.join(*directory)
     if os.path.exists(os.path.join(path, "items.csv")):
         item_data.update(load_csv(os.path.join(path, "items.csv")))
@@ -640,6 +743,32 @@ def load_data(*directory):
         nouns.update(load_csv(os.path.join(path, "nouns.csv")))
 
 
+# Load mods
+def load_mods():
+    global scripts
+    global lines
+    mod_list = [mod.name for mod in os.scandir(os.path.join(BASE_PATH, "mods")) if os.path.isdir(mod)]
+    for mod_name in mod_list:
+        mod_dir = os.path.join(BASE_PATH, "mods", mod_name)
+        # Get basic extensionsn
+        load_data(mod_dir)
+        lines.update(load_lines(mod_dir))
+        # Get scripted actions
+        sys.path.insert(0, mod_dir)
+        try:
+            importlib.reload(scripted_actions)
+        except NameError:
+            import scripted_actions
+        for script in scripted_actions.directory:
+            scripts[script().item_id] = script
+        sys.path.pop(0)
+
+
+def obituary(person: NPC):
+    # TODO: Add titles to player based on how they live
+    return f"NAME1 the Great"
+
+
 # Load main data
 lines = load_lines(BASE_PATH, "data")
 item_data = dict()
@@ -650,17 +779,3 @@ pronoun_list = dict()
 nouns = dict()
 scripts = dict()
 load_data(BASE_PATH, "data")
-
-# Load mods
-mod_list = [mod.name for mod in os.scandir(os.path.join(BASE_PATH, "mods")) if os.path.isdir(mod)]
-for mod_name in mod_list:
-    mod_dir = os.path.join(BASE_PATH, "mods", mod_name)
-    # Get basic extensions
-    load_data(mod_dir)
-    lines.update(load_lines(mod_dir))
-    # Get scripted actions
-    sys.path.insert(0, mod_dir)
-    import scripted_actions
-    for script in scripted_actions.directory:
-        scripts[script().item_id] = script
-    sys.path.pop(0)

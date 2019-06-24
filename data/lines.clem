@@ -4,6 +4,11 @@
 
 ##### PLEASE END ALL TEXT SECTIONS WITH PUNCTUATION! ##########################################################################################################
 (Jake) [
+	(Status) [
+		status.knockout | NAME1 is knocked unconscious.
+		status.unconscious | NAME1 is still unconscious.
+		status.wake_up | NAME1 wakes up from being unconscious.
+	]
 	(Drink) [
 		drink.desperation | NAME1 drinks from the <sewer / street drainage> out of desperation. | biome:urban
 		drink.desperation | NAME1 drinks from a puddle out of desperation.
@@ -39,12 +44,29 @@
 		explore.flee | NAME1 flees to {location}.
 	]
 	(Attack) [
-		attack.generic | NAME1 slashes NAME2 with HIS1 {weapon}. | item:weapon:melee
-		attack.generic | NAME1 stabs NAME2 with HIS1 {weapon}. | item:weapon:melee
-		attack.generic | NAME1 shoots NAME2 with HIS1 {weapon}. | item:weapon:handgun/item:weapon:rifle/item:weapon:bow
-		attack.generic | NAME1 pops a cap off in NAME2 using HIS1 {weapon}. | item:weapon:handgun/item:weapon:rifle
+		attack.generic | NAME1 slashes NAME2 with HIS1 {weapon}. | item:weapon:melee | player:arm
+		attack.generic | NAME1 stabs NAME2 with HIS1 {weapon}. | item:weapon:melee | player:arm
+		attack.generic | NAME1 shoots NAME2 with HIS1 {weapon}. | item:weapon:handgun/item:weapon:rifle/item:weapon:bow | player:arm
+		attack.generic | NAME1 pops a cap off in NAME2 using HIS1 {weapon}. | item:weapon:handgun/item:weapon:rifle | player:arm | return:limb:head
+		attack.no_weapon | NAME1 attacks NAME2 with HIS1 fists. | player:arm
 		attack.insult | NAME1 attempts to intimidate NAME2 with HIS1 physical prowess.
 		attack.insult |NAME1 insults NAME2.
-		attack.insult |NAME1 flashes their <ammoless> pistol at NAME2.| weapon:hangun
+		attack.insult |NAME1 flashes their <ammoless> pistol at NAME2.| weapon:handgun
+		# TODO: Make some commands that can affect the game, such as consuming ammo.
+		attack.intimidate | NAME1 fires a warning shot at NAME2. | item:weapon:hangun/item:weapon:rifle/item:weapon:bow | player:arm | do:consume:ammo(1)
+		attack.intimidate | NAME1 screams and charges at NAME2 with HIS1 {item} | item:weapon:melee | player:legs
+		attack.intimidate | NAME1 reveals HIS1 {item} to NAME2 and requests HE2 leaves.
+	]
+	(Entertain) [
+		entertain.bored | NAME1 practices HIS1 aim on a target. | weapon:loaded:handgun/weapon:loaded:rifle/weapon:loaded:bow | player:arm | do:consume:ammo(1)
+		# BIG STUPID CLOWN IS A PLACEHOLDER, YA DUMMY
+		entertain.bored | NAME1 acts like a big stupid clown.
+	]
+	(Meta) [
+		meta.day_end | End of day {day}.
+		meta.day_end | The sun sets on day {day}.
+		meta.everyone_survived | <The population/Everyone> lives to see another <sunrise/morning>.
+		meta.people_died | Let us remember those who have passed on this day:
+		meta.people_died | These brave souls have died today:
 	]
 ]

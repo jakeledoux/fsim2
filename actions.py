@@ -1,14 +1,29 @@
 import utils
 from utils import *
+from typing import List, Dict, Tuple, Union
 
 
-def act(player: NPC, universe, debug=0):  # NEURAL NET ARTIFICIAL BLOCKCHAIN FUCKING INTELLIGENCE
+# NEURAL NET ARTIFICIAL BLOCKCHAIN FUCKING INTELLIGENCE
+def act(player: NPC, universe, debug=0, rage_mode=False) -> List[Tuple[str, NPC]]:
+    """
+    The decision-making process for players.
+
+    :param player: Player doing the actions
+    :param universe: Universe player exists in
+    :param debug: Debug mode
+    :param rage_mode: RAAAAGGEE MOOODDEEE
+    :return: List of players who were involved in this turn and how they were involved.
+    It's recommended to skip their turns.
+    """
     if debug:
         print(f"NPC: {player.name} | Hunger: {player.hunger} | Thirst: {player.thirst} | Boredom: {player.boredom} | \
 Arrows: {player.count_ammo('arrow')} | Bullets: {player.count_ammo('bullet')}")
         print(f"Usable weapons: {player.usable_weapons()}")
     options = get_options(player)
 
+    involved_players = []
+
+    # SCORE OPTIONS ####################################################################################################
     # Weigh and score options // Int - ~[0-100]
     for i, option in enumerate(options):
         if option["action"] == "eat":
@@ -18,7 +33,8 @@ Arrows: {player.count_ammo('arrow')} | Bullets: {player.count_ammo('bullet')}")
         elif option["action"] == "fill_drink":
             options[i]["score"] = player.thirst * 2 - player.drink_amount()
         elif option["action"] == "scavenge":
-            # Sometimes the object has been scavenged first by someone else
+            # Sometimes the object has been scavenged first by someone else,
+            # maybe... This should be investigated and dealt with. Might have already been fixed.
             if option["object"] not in player.location.containers:
                 del options[i]
                 continue
@@ -36,11 +52,14 @@ Arrows: {player.count_ammo('arrow')} | Bullets: {player.count_ammo('bullet')}")
                     options[i]["reason"] = "inventory"
         elif option["action"] == "socialize":
             relation = player.get_relation(option["object"])
-            options[i]["score"] = player.loneliness // 2 + relation * (player.loneliness / 100)
+            options[i]["score"] = (player.kindness / 5) + (player.loneliness / 3) + relation
         elif option["action"] == "attack":
-            relation = player.get_relation(option["object"])
-            options[i]["score"] = (100 - player.kindness) // 2 + relation * -2
-            # options[i]["score"] = 200 # Debugging purposes. Rage mode.
+            if rage_mode:
+                # RAAAAAAAGE MOOOODDDEEEEEEEE
+                options[i]["score"] = 200
+            else:
+                relation = player.get_relation(option["object"])
+                options[i]["score"] = (100 - (player.kindness * 2)) // 2 + relation * -2
         elif option["action"] == "travel":
             options[i]["score"] = 20 - (len(player.location.containers) * 5 +
                                         (len(player.location.players) - 1) * 10)
@@ -54,32 +73,43 @@ Arrows: {player.count_ammo('arrow')} | Bullets: {player.count_ammo('bullet')}")
         for option in options:
             print(f"\t{color(str(option), Fore.LIGHTBLACK_EX)}")
 
-    # Execute one of the most desired options
+    # EXECUTE OPTION ###################################################################################################
     action = options[min(max(random.randrange(-1, 2), 0), len(options) - 1)]
     if action["action"] == "eat":
         printd(
             f"NAME1 eats {color(player.eat(), Style.BRIGHT + Fore.CYAN)}.", [player])
+
     elif action["action"] == "drink":
         if action.get("object") is None:
             printd(rand_line("drink.desperation", [player]), [player])
             player.thirst = max(player.thirst - random.randrange(30, 70), 0)
         else:
             printd(rand_line("drink.consume", [player]), [player], water_amount=player.drink())
+
     elif action["action"] == "fill_drink":
         printd(rand_line("drink.refill", [player]), [player], item=action['object'].name)
         action["object"].water_oz = action["object"].effectiveness
+
     elif action["action"] == "scavenge":
         scavenge(player, action["object"], reason=action.get("reason"))
+
     elif action["action"] == "socialize":
+        involved_players.append((action["action"], action["object"]))
         socialize(player, action["object"])
+
     elif action["action"] == "attack":
+        involved_players.append((action["action"], action["object"]))
         attack(player, action["object"])
+
     elif action["action"] == "travel":
         explore(player, universe)
+
     elif action["action"] == "entertain":
         # TODO: Entertainment actions, the meat of the game
-        printd("NAME1 acts like a big stupid clown.", [player])
+        # printd("NAME1 acts like a big stupid clown.", [player])
+        printd(rand_line("entertain.bored", [player]), [player])
         player.boredom = max(player.boredom - random.randrange(10, 30), 0)
+
     # Scripted actions
     elif action["action"] == "scripted":
         try:
@@ -93,10 +123,12 @@ Arrows: {player.count_ammo('arrow')} | Bullets: {player.count_ammo('bullet')}")
             if action["object"].script_object.done:
                 player.inventory.remove(action["object"])
         except KeyError as e:
+            print(scripts)
             raise Exception(f"Item '{e.args[0]}' contains incorrectly configured scripts.")
+    return involved_players
 
 
-def get_options(player: NPC):
+def get_options(player: NPC) -> List[Dict[str, Union[Item, NPC]]]:
     options = []
     # See if eating/drinking are options
     for item in player.inventory:
@@ -129,7 +161,7 @@ def get_options(player: NPC):
 
     # Interact with other people
     for person in player.location.players:
-        if person != player:
+        if person != player and not person.unconscious:
             options.append({"action": "socialize", "object": person})
             options.append({"action": "attack", "object": person})
 
@@ -150,7 +182,8 @@ def scavenge(player, con=None, reason=None):
     if reason is None:
         printd(rand_line("scavenge.general", [player]), [player], trailing=True, container=con.name)
     elif reason in ("food", "drink"):
-        printd(rand_line("scavenge.food_or_drink", [player]), [player], reason=reason, trailing=True, container=con.name)
+        printd(rand_line("scavenge.food_or_drink", [player]), [player], reason=reason, trailing=True,
+               container=con.name)
     elif reason == "inventory":
         printd(rand_line("scavenge.inventory", [player]), [player], trailing=True, container=con.name)
     # Pick up items
@@ -170,7 +203,7 @@ def scavenge(player, con=None, reason=None):
                 con.items.remove(con_item)
             else:
                 printd(rand_line("scavenge.too_heavy", [player]), [player], leading=True)
-            break # Only pick up one
+            break  # Only pick up one
     else:
         printd(rand_line("scavenge.empty"), [player], leading=True)
         player.location.containers.remove(con)
@@ -194,7 +227,7 @@ def explore(player, universe):
         printd(leaving_line, [player], location=player.location.color_name, biome=player.location.biome.color_name)
 
 
-def attack(player, other_npc):
+def attack(player: NPC, other_npc: NPC):
     # TODO: Check for weapon and ammo
     if len(player.usable_weapons()) > 0:  # If has weapon
         weapon = random.choice(player.usable_weapons())
@@ -202,24 +235,21 @@ def attack(player, other_npc):
         if random.choice([True, True, False, player.kindness < 50]):
             # Attack
             if weapon.requires_ammo:
+                # TODO: Replace with do:consume:ammo statement in Clem file
                 player.consume_ammo(weapon.ammo_type, amount=1)
-            other_npc.damage(weapon.damage)
-            printd(rand_line("attack.generic", [player, other_npc], item=weapon), [player, other_npc],
-                   weapon=weapon.name)
+            # Get return values from generic attack
+            attack_results = printd(rand_line("attack.generic", [player, other_npc], item=weapon), [player, other_npc],
+                                    weapon=weapon.name)
+            # Split into userful information
+            limb = attack_results.get("limb")
+            other_npc.damage(weapon.damage, limb)
             other_npc.interact(player, "friendly", -50)
             return True
         else:
             # Scare off
-            choice = random.randrange(3)
-            if choice == 0:
-                # TODO: MAKE THIS ONLY WORK WITH GUNS
-                printd("NAME1 fires a warning shot at NAME2.", [player, other_npc])
-            elif choice == 1:
-                printd("NAME1 screams and charges at NAME2 with HIS1 %s." % player.poll_inventory("tool")[0].name,
-                       [player, other_npc])
-            elif choice == 2:
-                printd("NAME1 reveals HIS1 %s to NAME2 and requests HE2 leaves." % player.poll_inventory("tool")[
-                    0].name, [player, other_npc])
+            # Should the formatting for weapons be colored? I don't know. It might draw too much attention to the
+            # variable parts of the message and make it more like a madlib.
+            printd(rand_line("attack.intimidate", [player], item=weapon), [player, other_npc], item=weapon.name)
             other_npc.interact(player, "friendly", -30)
             # TODO: Other responses for other_npc
             location_choices = other_npc.location.biome.locations.copy()
@@ -230,7 +260,7 @@ def attack(player, other_npc):
     else:  # If no weapon
         choice = random.randrange(2)
         if choice == 0:
-            printd("NAME1 attacks NAME2 with HIS1 fists.", [player, other_npc])
+            printd(rand_line("attack.no_weapon", [player]), [player, other_npc])
             other_npc.damage(10)
             other_npc.interact(player, "friendly", -30)
             return True
