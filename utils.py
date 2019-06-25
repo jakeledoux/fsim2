@@ -1,5 +1,5 @@
 import importlib
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 import colorama
 import mimesis
 import os
@@ -11,21 +11,40 @@ from colorama import Fore, Style
 colorama.init(autoreset=True)
 
 # RegEx Patterns
-re_line_op = re.compile("<[^>]+>")
-re_line_ext = re.compile("<([^>]+)>")
-re_end_punct = re.compile("[.,!?;]$")
-re_parens_int = re.compile("\((\d+)\)")
-re_parens_str = re.compile("\((\D+)\)")
+re_line_op = re.compile(r'<[^>]+>')
+re_line_ext = re.compile(r'<([^>]+)>')
+re_end_punct = re.compile(r'[.,!?;]$')
+re_parens_int = re.compile(r'\((\d+)\)')
+re_parens_str = re.compile(r'\((\D+)\)')
 
 BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
+# Exceptions
+class StateMismatch(Exception):
+    pass
+
+
+class InventoryError(Exception):
+    pass
+
+
 class Line(object):
+    """ Container object for Clem-formatted game text."""
     def __repr__(self):
         return f"<Line: {self.id}| Req: {self.requirements}| Act: {self.actions}| Ret: {self.returns}>"
 
     def __init__(self, line_id: str, line_text: str, line_requirements: List[str],
                  line_actions: List[str], line_returns: Dict[str, str]):
+        """ Instantiates a line object. If you're using this, you're probably doing something wrong.
+        This should only be used in :func:`utils.load_lines`.
+
+        :param line_id: Text-ID for line. E.g. attack.generic or scavenge.too_heavy
+        :param line_text: The body of the line. This is the text to be formatted and displayed.
+        :param line_requirements: Clem format actions. E.g. biome:suburban or item:weapon:rifle
+        :param line_actions: Clem format actions. E.g. do:consume:ammo(1) or do:pickup:axe
+        :param line_returns: Clem format returns. E.g. return:limb:head
+        """
         self.id = line_id
         self.text = line_text
         self.requirements = line_requirements
@@ -34,7 +53,12 @@ class Line(object):
         # print(self)
 
 
-def get_paren_int(intext):
+def get_paren_int(intext: str) -> int:
+    """ Extracts integers from parentheses. For use with Clem actions.
+
+        :param intext: String to be checked. E.g. do:consume:ammo(1)
+        :returns: Integer found inside parens.
+    """
     return int(re_parens_int.search(intext).group(1))
 
 
@@ -122,7 +146,12 @@ def get_lines(line_id: str, players=None, item=None) -> List[Line]:
     return out_lines
 
 
-def load_lines(*directory):
+def load_lines(*directory) -> Dict[str, List[Line]]:
+    """ Parses Clem file into Line objects.
+
+    :param directory: The directory to look in for 'lines.clem'.
+    :return: Dictionary of lists of Line objects. The keys are derived from Line.id.
+    """
     with open(os.path.join(*directory, f"lines.clem"), "r") as f:
         filedata = f.read()
         filedata = (line.strip() for line in filedata.splitlines())
@@ -153,31 +182,9 @@ def load_lines(*directory):
         return output
 
 
-def walkable_coords(player, universe):
-    size = universe.size
-    current_coords = list(player.location.biome.coords)
-    output = list()
-    output.append([max(size - 1, min(0, current_coords[0] - 1)), current_coords[1]])
-    output.append([max(size - 1, min(0, current_coords[0] + 1)), current_coords[1]])
-    output.append([current_coords[0], max(size - 1, min(0, current_coords[1] - 1))])
-    output.append([current_coords[0], max(size - 1, min(0, current_coords[1] + 1))])
-
-    return output
-
-
 def clear():
+    """ Clears terminal."""
     os.system("cls" if os.name == "nt" else "clear")
-
-
-def does_evil(player):
-    """ THIS IS LEGACY CODE. DO NOT USE IT. IT *WILL* BREAK.
-
-        Once this function is confirmed to not appear anywhere in the game, delete it.
-    """
-    evil = random.choice([False, True])  # Roll for good or evil action
-    if not evil and player.mean:  # Mean players get a second chance to be evil
-        evil = random.choice([False, True])
-    return evil
 
 
 def printd(intext, players=(), trailing=False, leading=False, **kwargs):
@@ -291,22 +298,15 @@ def gen_location(type_id):
         return mimesis.Address().street_name() + " " + random.choice(nouns["street"])
 
 
-def gen_biome(type_id):
-    if type_id == "urban":
-        return mimesis.Address().city()
-    elif type_id == "suburban":
-        return mimesis.Address().city() + " " + random.choice(['Estates', 'Town', 'Village', 'Suburbs', 'Hills'])
-    elif type_id == "rural":
-        return mimesis.Address().city() + " " + random.choice(
-            ['Swamp', 'Mountain', 'Valley', 'Plains', 'Countryside'])
-
-
 class World:
+    """ World object that the entire game exists within.
+        Commonly referred to as "universe".
+    """
     def __init__(self, size, biome_size):
-        self.biomes = []
-        self.players = []
-        self.size = size
-        self.day = 0
+        self.biomes: List[List[Biome]] = []
+        self.players: List[NPC] = []
+        self.size: Tuple[int, int] = size
+        self.day: int = 0
 
         # Generate 2d array of biomes
         for x_coord in range(size):
@@ -317,16 +317,17 @@ class World:
 
 
 class Biome:
+    """ Biomes contain locations and subtly effect player actions."""
     def __repr__(self):
         return self.type + ":" + self.name
 
-    def __init__(self, biome_size, world_coords):
+    def __init__(self, biome_size, world_coords: Tuple[int, int]):
         biome_types = ['urban', 'suburban', 'rural']
         self.type = random.choice(biome_types)
-        self.name = gen_biome(self.type)
+        self.name = Biome.gen_name(self.type)
         self.locations = []
-        self.precipation = (biome_types.index(self.type) + 1) * random.randrange(33)
-        self.coords = world_coords
+        self.precipitation = (biome_types.index(self.type) + 1) * random.randrange(33)
+        self.coords: Tuple[int, int] = world_coords
         # Generate locations in Biome
         for new_location in range(biome_size):
             self.locations.append(Location(self.type, self, street=True))
@@ -335,6 +336,21 @@ class Biome:
     @property
     def color_name(self):
         return Style.BRIGHT + Fore.MAGENTA + self.name + Style.RESET_ALL
+
+    @staticmethod
+    def gen_name(type_id: str) -> str:
+        """ Generates name for biome.
+
+        :param type_id: urban, suburban, or rural
+        :return: Generated name
+        """
+        if type_id == "urban":
+            return mimesis.Address().city()
+        elif type_id == "suburban":
+            return mimesis.Address().city() + " " + random.choice(['Estates', 'Town', 'Village', 'Suburbs', 'Hills'])
+        elif type_id == "rural":
+            return mimesis.Address().city() + " " + random.choice(
+                ['Swamp', 'Mountain', 'Valley', 'Plains', 'Countryside'])
 
 
 class Location:
@@ -365,44 +381,6 @@ class Location:
         return Style.BRIGHT + Fore.MAGENTA + self.name + Style.RESET_ALL
 
 
-class Container:
-    def __init__(self, type_id, items=None, name=None, explicit=False):
-        """ Explicit allows for directly annotating the container type
-        """
-        self.items = [] if items is None else items
-
-        if type_id != 'corpse':
-            if explicit:
-                self.type = type_id
-            else:
-                compatible_containers = []
-                for con in container_types:
-                    if type_id in container_types[con]:
-                        compatible_containers.append(con)
-                self.type = random.choice(compatible_containers)  # Choose random compatible Container
-        else:
-            self.type = 'corpse'
-
-        self.name = ""
-        if name is not None:
-            self.name = name
-        else:
-            if nouns.get(self.type) is not None:
-                try:
-                    self.name = random.choice(nouns.get(self.type))
-                except IndexError:
-                    print(f"{self.type} | {nouns.get(self.type)}")
-            else:
-                self.name = self.__repr__()
-
-        if len(self.items) == 0:
-            item_count = random.randrange(4)
-            self.items += [Item(random.choice(list(item_data))) for _ in range(item_count)]
-
-    def __repr__(self):
-        return f"Container:{self.type}:{self.name}"
-
-
 class Item:
     def __repr__(self):
         if self.type == "drink":
@@ -411,6 +389,12 @@ class Item:
             return self.type + ":" + self.name
 
     def __init__(self, item_id, water_oz=None):
+        """
+        Item object. Stored within :class:`Container` or :class:`NPC` inventories.
+
+        :param item_id: Type of item to be created. Defined in items.csv.
+        :param water_oz: Amount of water contained if applicable. If not specified, a random amount will be chosen.
+        """
         self.id = item_id
         self.name = item_data[item_id][0]  # String
         self.type = item_data[item_id][1]  # String - "food","drink","tool","Container"
@@ -447,6 +431,50 @@ class Item:
         self.weight = self.dry_mass + (self.water_oz / 16)
 
 
+class Container:
+    def __init__(self, type_id: str, items: List[Item] = None, name: str = None, explicit: bool = False):
+        """
+        Container object
+
+        :param type_id: Type of container (Unless corpse, will be overwritten if not explicit)
+        :param items: Optional list of items to populate the container.
+        :param name: Optional name of container
+        :param explicit: Whether to use type_id
+        """
+        self.items = [] if items is None else items
+
+        if type_id != 'corpse':
+            if explicit:
+                self.type = type_id
+            else:
+                compatible_containers = []
+                for con in container_types:
+                    if type_id in container_types[con]:
+                        compatible_containers.append(con)
+                self.type = random.choice(compatible_containers)  # Choose random compatible Container
+        else:
+            self.type = 'corpse'
+
+        self.name = ""
+        if name is not None:
+            self.name = name
+        else:
+            if nouns.get(self.type) is not None:
+                try:
+                    self.name = random.choice(nouns.get(self.type))
+                except IndexError:
+                    print(f"{self.type} | {nouns.get(self.type)}")
+            else:
+                self.name = self.__repr__()
+
+        if len(self.items) == 0:
+            item_count = random.randrange(4)
+            self.items += [Item(random.choice(list(item_data))) for _ in range(item_count)]
+
+    def __repr__(self):
+        return f"Container:{self.type}:{self.name}"
+
+
 class Relation:
     def __repr__(self):
         return "Relationship" + str((self.type, self.affinity))
@@ -457,13 +485,23 @@ class Relation:
 
 
 class NPC:
+    """ NPC object that exists in and manipulates the world.
+        Commonly referred to as 'player'.
+    """
     def __repr__(self):
         return 'NPC:' + self.name
 
     def __init__(self, name, gender, kindness=None, bicurious=None):
+        """ Instantiates a player.
+
+        :param name: Player's first name (properly capitalized)
+        :param gender: 0 is female, 1 is male, 2 is other.
+        :param kindness: Optional kindness level (0-100)
+        :param bicurious: Optional bicurious flag. Essentially bisexuality.
+        """
 
         # Identity
-        self.name: str = name  # String
+        self.name: str = name.strip()  # String
         self.gender: int = gender  # Int - 0:female, 1:male
         self.relations: Dict[str, Relation] = {}  # Dict - {"Other NPC's Name" : <Relation object>}
         # Example: {"Charlie":['friendly', 10], "Danny":['friendly', -50], "Susan":['romantic', 39]}
@@ -473,29 +511,30 @@ class NPC:
         self.extroversion: float = round(random.random(), 3)
 
         # Needs
-        self.hunger = random.randrange(10)  # Int - [0-100]
-        self.thirst = random.randrange(10)  # Int - [0-100]
-        self.loneliness = random.randrange(10, 80) * self.extroversion  # Int - [0-100]
-        self.boredom = random.randrange(20, 40)
+        self.hunger: int = random.randrange(10)  # [0-100]
+        self.thirst: int = random.randrange(10)  # [0-100]
+        self.loneliness: int = random.randrange(10, 80) * self.extroversion  # [0-100]
+        self.boredom: int = random.randrange(20, 40)  # [0-100]
 
-        self.inventory: List[Item] = []  # List - [Item(),Item(),Item()]
-        self.strength = 50 if self.gender == 1 else 40  # Int - How much the NPC can carry without a Container
-        self.location: Location = None  # Location() - Must be defined before start of game
+        self.inventory: List[Item] = []
+        self.strength = 50 if self.gender == 1 else 40  # How much the NPC can carry without a Container
+        self.location: Location = None  # Must be defined before game begins
 
-        self.unconscious = False
-        self.dead = False
-        self.days_to_live = -1  # If positive it will count down until zero, and they will die.
-        self.death_message = ""
-        self.death_day = -1
+        self.unconscious: bool = False
+        self.dead: bool = False
+        self.days_to_live: int = -1  # If positive it will count down until zero, and they will die.
+        self.death_message: str = ""
+        self.death_day: int = -1
 
-        self.kills = 0
+        self.kills: int = 0
 
         # Dict - Int - >=10:nominal,0-10:broken,<=-1:dismembered
         # self.limbs = {'l_arm': 20, 'r_arm': 20, 'l_leg': 20, 'r_leg': 20, 'head': 20}
         # Actually maybe not that ^
         self.limbs = {'l_arm': 100, 'r_arm': 100, 'l_leg': 100, 'r_leg': 100, 'head': 100}
 
-    def step(self):  # Iterate the player's needs (Should be called once per cycle/day)
+    def step(self):
+        """ Iterate the player's needs (Should be called once per cycle/day)"""
         if self.days_to_live > 0:
             self.days_to_live -= 1
         elif self.days_to_live == 0:
@@ -515,20 +554,41 @@ class NPC:
         elif self.thirst > 100:
             self.die("NAME1 died of thirst.")
 
-    def random_location(self, universe):
+    def random_location(self, universe: World):
+        """
+        Moves the player to a random position in the universe.
+
+        :param universe: Primary game world
+        """
         self.move(random.choice(random.choice(random.choice(universe.biomes)).locations))
 
-    def set_days_to_live(self, days, death_message):
+    def set_days_to_live(self, days: int, death_message: str) -> None:
+        """
+        Starts a death-countdown at the end of which the player will die.
+
+        :param days: Number of days the player has to live
+        :param death_message: Message to display upon death. Use :func:`utils.rand_line` instead of hard-coding this.
+        """
         self.death_message = death_message
         self.days_to_live = days
 
-    def die(self, death_message):
+    def die(self, death_message) -> None:
+        """
+        Cause player to die.
+
+        :param death_message: Message to display upon death. Use :func:`utils.rand_line` instead of hard-coding this.
+        """
         self.death_message = death_message
         self.dead = True
         self.location.players.remove(self)
         self.location.containers.append(Container('corpse', self.inventory, f"{self.name}'s corpse"))
 
-    def food_amount(self):
+    def food_amount(self) -> int:
+        """
+        Polls total food in inventory.
+
+        :return: Integer equal to the amount of food the player has.
+        """
         amount = 0
         for thing in self.inventory:
             if thing.type == "food":
@@ -536,7 +596,12 @@ class NPC:
 
         return amount
 
-    def drink_amount(self):
+    def drink_amount(self) -> int:
+        """
+        Polls total drinkable fluids in inventory.
+
+        :return: Integer equal to the amount of drinkable fluids the player has.
+        """
         amount = 0
         for thing in self.inventory:
             if thing.type == "drink":
@@ -578,25 +643,45 @@ class NPC:
                       "head": limb_cond['head']}
         return conditions
 
-    def wake_up(self):
-        # Wake up and heal head a little
-        self.unconscious = False
-        self.limbs['head'] = 30
+    def wake_up(self) -> None:
+        """ Cause player to wake up from being unconscious and set head health to 30."""
+        if self.unconscious:
+            self.unconscious = False
+            self.limbs['head'] = 30
+        else:
+            raise StateMismatch("Player was not unconscious when told to wake up.")
 
-    def move(self, new_location):
+    def move(self, new_location: Location) -> None:
+        """
+        Move player into location provided.
+
+        :param new_location:
+        """
         if self.location is not None:
             self.location.players.remove(self)
         self.location = new_location
         new_location.players.append(self)
 
-    def interact(self, other_npc, relation_type, amount):  # Modify/create relationship
+    def interact(self, other_npc_name: str, relation_type: str, amount: int) -> None:
+        """
+        Modify relationship between player and other_npc.
+
+        :param other_npc_name: Name of other NPC object.
+        :param relation_type: Type of relationship.
+        :param amount: Amount to add.
+        """
         try:  # Try to add affinity
-            self.relations[other_npc].affinity += amount
+            self.relations[other_npc_name].affinity += amount
         except KeyError:  # If there's no relationship with that NPC, create one
-            self.relations[other_npc] = Relation(relation_type, amount)
+            self.relations[other_npc_name] = Relation(relation_type, amount)
         self.loneliness = min(self.loneliness - 30, 0)
 
-    def pickup(self, item):
+    def pickup(self, item: Union[Item, str]):
+        """
+        Add item to player's inventory
+
+        :param item: Either existing item object or item ID to create an object with.
+        """
         if type(item) == str:
             item_object = Item(item)
         else:
@@ -614,6 +699,7 @@ class NPC:
             return False
 
     def eat(self):
+        """ Consumes food from inventory."""
         food_item = None
 
         # Identify food Item closest to hunger level
@@ -633,6 +719,7 @@ class NPC:
             return False
 
     def drink(self):
+        """ Consumes drinkable fluid from inventory."""
         water = []
         for thing in self.inventory:
             if thing.type == "drink":
@@ -656,32 +743,62 @@ class NPC:
                 drink.water_oz = 0
         return oz_drank
 
-    def give(self, thing, other_npc):
+    def give(self, thing: Item, other_npc: 'NPC'):
+        """
+        Give an item to another NPC.
+
+        :param thing: Gift to give
+        :param other_npc: Recipient of gift
+        """
         if other_npc.pickup(thing):
             self.inventory.remove(thing)
             return True
         else:
             return False
 
-    def poll_inventory(self, type_id):  # Return list of type of Item in inventory
+    def poll_inventory(self, type_id) -> List[Item]:  # Return list of type of Item in inventory
+        """
+        Gets all items of type_id in inventory.
+
+        :param type_id: Item ID to search for
+        :return: List of items matched
+        """
         output = []
         for thing in self.inventory:
             if thing.type == type_id:
                 output.append(thing)
         return output
 
-    def does_evil(self, variability=75):
+    def does_evil(self, variability=75) -> bool:
+        """
+        Returns bool deciding whether or not to do an evil thing. Based on kindness formula.
+
+        :param variability: Amount of randomness to introduce
+        :return: Whether the evil act should be committed
+        """
         v = variability
         k = self.kindness
         return ((random.random() * v - (v / 2)) + 25 + k / 2) < 50
 
-    def get_relation(self, other_npc):
+    def get_relation(self, other_npc: 'NPC') -> int:
+        """
+        Return relation between self and another NPC
+
+        :param other_npc: NPC to look up relationship for
+        :return: Relationship level
+        """
         try:
             return self.relations[other_npc.name].affinity
         except KeyError:
             return 0
 
-    def count_ammo(self, ammo_type):
+    def count_ammo(self, ammo_type: str) -> int:
+        """
+        Polls inventory for ammo of specific type
+
+        :param ammo_type: Type of ammo. Types are defined in weapons.csv and items.csv
+        :return: Amount of matched ammo in inventory
+        """
         return len([item for item in self.inventory if item.type == "ammo" and item.id == ammo_type])
 
     def consume_ammo(self, ammo_type, amount=1):
@@ -695,10 +812,25 @@ class NPC:
                             return True
         return False
 
-    def get_weapon(self, weapon_types=[]):
-        return random.choice(self.usable_weapons(weapon_types))
+    def get_weapon(self, weapon_types=[]) -> Item:
+        """
+        Gets random weapon of specific type.
 
-    def usable_weapons(self, weapon_types=[]):
+        :param weapon_types: List of desired weapon types.
+        :return: Random matched weapon.
+        """
+        try:
+            return random.choice(self.usable_weapons(weapon_types))
+        except IndexError:
+            raise InventoryError(f"Player has no weapon matching types {weapon_types}")
+
+    def usable_weapons(self, weapon_types=[]) -> List[Item]:
+        """
+        Gets list of weapons of specific type.
+
+        :param weapon_types: List of desired weapon types.
+        :return: All matched weapons.
+        """
         output = []
         for item in self.inventory:
             if item.is_weapon:
@@ -711,14 +843,42 @@ class NPC:
                         output.append(item)
         return output
 
+    def obituary(self) -> str:
+        """ Generates obituary title for player. E.g. Chrundle the Great, Robert the Fearless."""
+        # TODO: Add titles to player based on how they live
+        return f"NAME1 the Great"
 
-def color(intext, fore_color, bright=False):
+
+def walkable_coords(player: NPC, universe: World) -> List[Tuple[int, int]]:
+    """ Returns adjacent biomes to player's location in Universe.
+
+    :param player:
+    :param universe: World that player exists in.
+    :return: List of world coordinates that can be used to lookup biomes.
+    """
+    size = universe.size
+    current_coords = list(player.location.biome.coords)
+    output = list()
+    output.append((max(size - 1, min(0, current_coords[0] - 1)), current_coords[1]))
+    output.append((max(size - 1, min(0, current_coords[0] + 1)), current_coords[1]))
+    output.append((current_coords[0], max(size - 1, min(0, current_coords[1] - 1))))
+    output.append((current_coords[0], max(size - 1, min(0, current_coords[1] + 1))))
+
+    return output
+
+
+def color(intext: str, fore_color: int, bright: bool = False):
+    """ Colors string
+
+    :param intext: String to be colored
+    :param fore_color: Colorama color to be used. E.g. Fore.BLACK
+    :param bright:
+    """
     return (Style.BRIGHT if bright else "") + fore_color + intext + Style.RESET_ALL
 
 
 def load_data(*directory):
-    """
-    Loads csv data files in directory.
+    """ Loads csv data files in directory.
 
     :param directory: String arguments that form a path
     """
@@ -762,11 +922,6 @@ def load_mods():
         for script in scripted_actions.directory:
             scripts[script().item_id] = script
         sys.path.pop(0)
-
-
-def obituary(person: NPC):
-    # TODO: Add titles to player based on how they live
-    return f"NAME1 the Great"
 
 
 # Load main data

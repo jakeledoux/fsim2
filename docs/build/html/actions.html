@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>actions module &#8212; Fallout Simulator 2  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-actions">
+<span id="actions-module"></span><h1>actions module<a class="headerlink" href="#module-actions" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="actions.act">
+<code class="sig-prename descclassname">actions.</code><code class="sig-name descname">act</code><span class="sig-paren">(</span><em class="sig-param">player: utils.NPC</em>, <em class="sig-param">universe</em>, <em class="sig-param">debug=0</em>, <em class="sig-param">rage_mode=False</em><span class="sig-paren">)</span> &#x2192; List[Tuple[str, utils.NPC]]<a class="headerlink" href="#actions.act" title="Permalink to this definition">¶</a></dt>
+<dd><p>The decision-making process for players.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>player</strong> – Player doing the actions</p></li>
+<li><p><strong>universe</strong> – Universe player exists in</p></li>
+<li><p><strong>debug</strong> – Debug mode</p></li>
+<li><p><strong>rage_mode</strong> – RAAAAGGEE MOOODDEEE</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of players who were involved in this turn and how they were involved.</p>
+</dd>
+</dl>
+<p>It’s recommended to skip their turns.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="actions.attack">
+<code class="sig-prename descclassname">actions.</code><code class="sig-name descname">attack</code><span class="sig-paren">(</span><em class="sig-param">player: utils.NPC</em>, <em class="sig-param">other_npc: utils.NPC</em><span class="sig-paren">)</span><a class="headerlink" href="#actions.attack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="actions.explore">
+<code class="sig-prename descclassname">actions.</code><code class="sig-name descname">explore</code><span class="sig-paren">(</span><em class="sig-param">player</em>, <em class="sig-param">universe</em><span class="sig-paren">)</span><a class="headerlink" href="#actions.explore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="actions.get_options">
+<code class="sig-prename descclassname">actions.</code><code class="sig-name descname">get_options</code><span class="sig-paren">(</span><em class="sig-param">player: utils.NPC</em><span class="sig-paren">)</span> &#x2192; List[Dict[str, Union[utils.Item, utils.NPC]]]<a class="headerlink" href="#actions.get_options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="actions.scavenge">
+<code class="sig-prename descclassname">actions.</code><code class="sig-name descname">scavenge</code><span class="sig-paren">(</span><em class="sig-param">player</em>, <em class="sig-param">con=None</em>, <em class="sig-param">reason=None</em><span class="sig-paren">)</span><a class="headerlink" href="#actions.scavenge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="actions.socialize">
+<code class="sig-prename descclassname">actions.</code><code class="sig-name descname">socialize</code><span class="sig-paren">(</span><em class="sig-param">player</em>, <em class="sig-param">other_npc</em><span class="sig-paren">)</span><a class="headerlink" href="#actions.socialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Fallout Simulator 2</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Small Step.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/actions.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,592 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>utils module &#8212; Fallout Simulator 2  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-utils">
+<span id="utils-module"></span><h1>utils module<a class="headerlink" href="#module-utils" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="utils.Biome">
+<em class="property">class </em><code class="sig-prename descclassname">utils.</code><code class="sig-name descname">Biome</code><span class="sig-paren">(</span><em class="sig-param">biome_size, world_coords: Tuple[int, int]</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.Biome" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Biomes contain locations and subtly effect player actions.</p>
+<dl class="method">
+<dt id="utils.Biome.color_name">
+<em class="property">property </em><code class="sig-name descname">color_name</code><a class="headerlink" href="#utils.Biome.color_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="utils.Biome.gen_name">
+<em class="property">static </em><code class="sig-name descname">gen_name</code><span class="sig-paren">(</span><em class="sig-param">type_id: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#utils.Biome.gen_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates name for biome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>type_id</strong> – urban, suburban, or rural</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Generated name</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="utils.Container">
+<em class="property">class </em><code class="sig-prename descclassname">utils.</code><code class="sig-name descname">Container</code><span class="sig-paren">(</span><em class="sig-param">type_id: str</em>, <em class="sig-param">items: List[utils.Item] = None</em>, <em class="sig-param">name: str = None</em>, <em class="sig-param">explicit: bool = False</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.Container" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="utils.InventoryError">
+<em class="property">exception </em><code class="sig-prename descclassname">utils.</code><code class="sig-name descname">InventoryError</code><a class="headerlink" href="#utils.InventoryError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="utils.Item">
+<em class="property">class </em><code class="sig-prename descclassname">utils.</code><code class="sig-name descname">Item</code><span class="sig-paren">(</span><em class="sig-param">item_id</em>, <em class="sig-param">water_oz=None</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.Item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="utils.Item.calc_weight">
+<code class="sig-name descname">calc_weight</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.Item.calc_weight" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="utils.Item.color_name">
+<em class="property">property </em><code class="sig-name descname">color_name</code><a class="headerlink" href="#utils.Item.color_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="utils.Item.water_units">
+<em class="property">property </em><code class="sig-name descname">water_units</code><a class="headerlink" href="#utils.Item.water_units" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="utils.Line">
+<em class="property">class </em><code class="sig-prename descclassname">utils.</code><code class="sig-name descname">Line</code><span class="sig-paren">(</span><em class="sig-param">line_id: str, line_text: str, line_requirements: List[str], line_actions: List[str], line_returns: Dict[str, str]</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.Line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container object for Clem-formatted game text.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="utils.Location">
+<em class="property">class </em><code class="sig-prename descclassname">utils.</code><code class="sig-name descname">Location</code><span class="sig-paren">(</span><em class="sig-param">type_id</em>, <em class="sig-param">parent_biome</em>, <em class="sig-param">street=False</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.Location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="utils.Location.color_name">
+<em class="property">property </em><code class="sig-name descname">color_name</code><a class="headerlink" href="#utils.Location.color_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="utils.NPC">
+<em class="property">class </em><code class="sig-prename descclassname">utils.</code><code class="sig-name descname">NPC</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">gender</em>, <em class="sig-param">kindness=None</em>, <em class="sig-param">bicurious=None</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.NPC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>NPC object that exists in and manipulates the world.
+Commonly referred to as ‘player’.</p>
+<dl class="method">
+<dt id="utils.NPC.consume_ammo">
+<code class="sig-name descname">consume_ammo</code><span class="sig-paren">(</span><em class="sig-param">ammo_type</em>, <em class="sig-param">amount=1</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.NPC.consume_ammo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.count_ammo">
+<code class="sig-name descname">count_ammo</code><span class="sig-paren">(</span><em class="sig-param">ammo_type: str</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#utils.NPC.count_ammo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Polls inventory for ammo of specific type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ammo_type</strong> – Type of ammo. Types are defined in weapons.csv and items.csv</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Amount of matched ammo in inventory</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.damage">
+<code class="sig-name descname">damage</code><span class="sig-paren">(</span><em class="sig-param">amount: int</em>, <em class="sig-param">limb: str = None</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.NPC.damage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deal damage to NPC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>amount</strong> – Amount of damage to inflict</p></li>
+<li><p><strong>limb</strong> – Limb to damage - ‘l_arm’, ‘r_arm’, ‘l_leg’, ‘r_leg’, or ‘head’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Nothing at the moment</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.die">
+<code class="sig-name descname">die</code><span class="sig-paren">(</span><em class="sig-param">death_message</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#utils.NPC.die" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cause player to die.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>death_message</strong> – Message to display upon death. Use <a class="reference internal" href="#utils.rand_line" title="utils.rand_line"><code class="xref py py-func docutils literal notranslate"><span class="pre">utils.rand_line()</span></code></a> instead of hard-coding this.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.does_evil">
+<code class="sig-name descname">does_evil</code><span class="sig-paren">(</span><em class="sig-param">variability=75</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#utils.NPC.does_evil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns bool deciding whether or not to do an evil thing. Based on kindness formula.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>variability</strong> – Amount of randomness to introduce</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Whether the evil act should be committed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.drink">
+<code class="sig-name descname">drink</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.NPC.drink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Consumes drinkable fluid from inventory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.drink_amount">
+<code class="sig-name descname">drink_amount</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#utils.NPC.drink_amount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Polls total drinkable fluids in inventory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Integer equal to the amount of drinkable fluids the player has.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.eat">
+<code class="sig-name descname">eat</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.NPC.eat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Consumes food from inventory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.food_amount">
+<code class="sig-name descname">food_amount</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#utils.NPC.food_amount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Polls total food in inventory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Integer equal to the amount of food the player has.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.get_relation">
+<code class="sig-name descname">get_relation</code><span class="sig-paren">(</span><em class="sig-param">other_npc: utils.NPC</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#utils.NPC.get_relation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return relation between self and another NPC</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>other_npc</strong> – NPC to look up relationship for</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Relationship level</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.get_weapon">
+<code class="sig-name descname">get_weapon</code><span class="sig-paren">(</span><em class="sig-param">weapon_types=[]</em><span class="sig-paren">)</span> &#x2192; utils.Item<a class="headerlink" href="#utils.NPC.get_weapon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets random weapon of specific type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>weapon_types</strong> – List of desired weapon types.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Random matched weapon.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.give">
+<code class="sig-name descname">give</code><span class="sig-paren">(</span><em class="sig-param">thing: utils.Item</em>, <em class="sig-param">other_npc: utils.NPC</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.NPC.give" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give an item to another NPC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>thing</strong> – Gift to give</p></li>
+<li><p><strong>other_npc</strong> – Recipient of gift</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.interact">
+<code class="sig-name descname">interact</code><span class="sig-paren">(</span><em class="sig-param">other_npc_name: str</em>, <em class="sig-param">relation_type: str</em>, <em class="sig-param">amount: int</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#utils.NPC.interact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify relationship between player and other_npc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other_npc_name</strong> – Name of other NPC object.</p></li>
+<li><p><strong>relation_type</strong> – Type of relationship.</p></li>
+<li><p><strong>amount</strong> – Amount to add.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.move">
+<code class="sig-name descname">move</code><span class="sig-paren">(</span><em class="sig-param">new_location: utils.Location</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#utils.NPC.move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move player into location provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>new_location</strong> – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.pickup">
+<code class="sig-name descname">pickup</code><span class="sig-paren">(</span><em class="sig-param">item: Union[utils.Item, str]</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.NPC.pickup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add item to player’s inventory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> – Either existing item object or item ID to create an object with.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.poll_inventory">
+<code class="sig-name descname">poll_inventory</code><span class="sig-paren">(</span><em class="sig-param">type_id</em><span class="sig-paren">)</span> &#x2192; List[utils.Item]<a class="headerlink" href="#utils.NPC.poll_inventory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets all items of type_id in inventory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>type_id</strong> – Item ID to search for</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of items matched</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.poll_limbs">
+<code class="sig-name descname">poll_limbs</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict[str, bool]<a class="headerlink" href="#utils.NPC.poll_limbs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies whether sections of the body work or not</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dictionary with “arm”, “arms”, “leg”, “legs”, “head” and their state as a bool.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.random_location">
+<code class="sig-name descname">random_location</code><span class="sig-paren">(</span><em class="sig-param">universe: utils.World</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.NPC.random_location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves the player to a random position in the universe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>universe</strong> – Primary game world</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.set_days_to_live">
+<code class="sig-name descname">set_days_to_live</code><span class="sig-paren">(</span><em class="sig-param">days: int</em>, <em class="sig-param">death_message: str</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#utils.NPC.set_days_to_live" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts a death-countdown at the end of which the player will die.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>days</strong> – Number of days the player has to live</p></li>
+<li><p><strong>death_message</strong> – Message to display upon death. Use <a class="reference internal" href="#utils.rand_line" title="utils.rand_line"><code class="xref py py-func docutils literal notranslate"><span class="pre">utils.rand_line()</span></code></a> instead of hard-coding this.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.NPC.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate the player’s needs (Should be called once per cycle/day)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.usable_weapons">
+<code class="sig-name descname">usable_weapons</code><span class="sig-paren">(</span><em class="sig-param">weapon_types=[]</em><span class="sig-paren">)</span> &#x2192; List[utils.Item]<a class="headerlink" href="#utils.NPC.usable_weapons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets list of weapons of specific type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>weapon_types</strong> – List of desired weapon types.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>All matched weapons.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="utils.NPC.wake_up">
+<code class="sig-name descname">wake_up</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#utils.NPC.wake_up" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cause player to wake up from being unconscious and set head health to 30.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="utils.Relation">
+<em class="property">class </em><code class="sig-prename descclassname">utils.</code><code class="sig-name descname">Relation</code><span class="sig-paren">(</span><em class="sig-param">type_id</em>, <em class="sig-param">amount</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.Relation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="utils.StateMismatch">
+<em class="property">exception </em><code class="sig-prename descclassname">utils.</code><code class="sig-name descname">StateMismatch</code><a class="headerlink" href="#utils.StateMismatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="utils.World">
+<em class="property">class </em><code class="sig-prename descclassname">utils.</code><code class="sig-name descname">World</code><span class="sig-paren">(</span><em class="sig-param">size</em>, <em class="sig-param">biome_size</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.World" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>World object that the entire game exists within.
+Commonly referred to as “universe”.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.clear">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears terminal.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.color">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">color</code><span class="sig-paren">(</span><em class="sig-param">intext: str</em>, <em class="sig-param">fore_color: int</em>, <em class="sig-param">bright: bool = False</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Colors string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>intext</strong> – String to be colored</p></li>
+<li><p><strong>fore_color</strong> – Colorama color to be used. E.g. Fore.BLACK</p></li>
+<li><p><strong>bright</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.gen_location">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">gen_location</code><span class="sig-paren">(</span><em class="sig-param">type_id</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.gen_location" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="utils.get_lines">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">get_lines</code><span class="sig-paren">(</span><em class="sig-param">line_id: str</em>, <em class="sig-param">players=None</em>, <em class="sig-param">item=None</em><span class="sig-paren">)</span> &#x2192; List[utils.Line]<a class="headerlink" href="#utils.get_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters game lines by line_id and requirements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>line_id</strong> – The category of text to look for in the list.</p></li>
+<li><p><strong>players</strong> – List of players relevant to this line. If omitted it will only return lines that don’t have filters.</p></li>
+<li><p><strong>item</strong> – For specific filters based on single objects selected by the game.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of line objects meeting criteria.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.get_paren_int">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">get_paren_int</code><span class="sig-paren">(</span><em class="sig-param">intext: str</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#utils.get_paren_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts integers from parentheses. For use with Clem actions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>intext</strong> – String to be checked. E.g. do:consume:ammo(1)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Integer found inside parens.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.load_csv">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">load_csv</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.load_csv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="utils.load_data">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">load_data</code><span class="sig-paren">(</span><em class="sig-param">*directory</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads csv data files in directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>directory</strong> – String arguments that form a path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.load_lines">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">load_lines</code><span class="sig-paren">(</span><em class="sig-param">*directory</em><span class="sig-paren">)</span> &#x2192; Dict[str, List[utils.Line]]<a class="headerlink" href="#utils.load_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses Clem file into Line objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>directory</strong> – The directory to look in for ‘lines.clem’.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary of lists of Line objects. The keys are derived from Line.id.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.load_mods">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">load_mods</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.load_mods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="utils.obituary">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">obituary</code><span class="sig-paren">(</span><em class="sig-param">person: utils.NPC</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.obituary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="utils.printd">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">printd</code><span class="sig-paren">(</span><em class="sig-param">intext</em>, <em class="sig-param">players=()</em>, <em class="sig-param">trailing=False</em>, <em class="sig-param">leading=False</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.printd" title="Permalink to this definition">¶</a></dt>
+<dd><p>I still don’t know why I originally called it printd instead of printf.
+The world may never know.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.rand_line">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">rand_line</code><span class="sig-paren">(</span><em class="sig-param">*args, **kwargs) -&gt; (&lt;class 'str'&gt;, typing.Dict[str, str]</em><span class="sig-paren">)</span><a class="headerlink" href="#utils.rand_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects a relevant line and executes its actions
+More or less an alias for random.choice(get_lines()).text, see get_lines() documentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – Passes to get_lines()</p></li>
+<li><p><strong>kwargs</strong> – Passes to get_lines()</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.walkable_coords">
+<code class="sig-prename descclassname">utils.</code><code class="sig-name descname">walkable_coords</code><span class="sig-paren">(</span><em class="sig-param">player: utils.NPC</em>, <em class="sig-param">universe: utils.World</em><span class="sig-paren">)</span> &#x2192; List[Tuple[int, int]]<a class="headerlink" href="#utils.walkable_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns adjacent biomes to player’s location in Universe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>player</strong> – </p></li>
+<li><p><strong>universe</strong> – World that player exists in.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of world coordinates that can be used to lookup biomes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Fallout Simulator 2</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Small Step.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/utils.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

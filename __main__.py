@@ -98,7 +98,7 @@ while True:
             else:
                 utils.printd(utils.rand_line("meta.people_died"))
             for body in funeral_parlor:
-                utils.printd(utils.obituary(body), [body])
+                utils.printd(body.obituary(), [body])
             if DEBUG_SPEED == 0 or (DEBUG_SPEED in (1, 3) and len(funeral_parlor) > 0):
                 input("Press enter...")
     # Play again?

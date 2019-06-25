@@ -142,7 +142,7 @@ def get_options(player: NPC) -> List[Dict[str, Union[Item, NPC]]]:
                 if option not in options:
                     options.append(option)
             else:
-                if player.location.biome.precipation > 30:
+                if player.location.biome.precipitation > 30:
                     option = {"action": "fill_drink", "object": item}
                     if option not in options:
                         options.append(option)
@@ -151,7 +151,7 @@ def get_options(player: NPC) -> List[Dict[str, Union[Item, NPC]]]:
             options.append({"action": "scripted", "object": item})
     # If no drinks whatsoever
     if not any(option["action"] == "drink" for option in options):
-        if player.location.biome.precipation > 30:
+        if player.location.biome.precipitation > 30:
             options.append({"action": "drink"})
 
     # Look around the room for useful things
@@ -275,7 +275,7 @@ def socialize(player, other_npc):
     # If excess of resources
     if len(player.poll_inventory("food")) > 1 or len(player.poll_inventory("drink")) > 1:
         try:
-            friends = player.relations[other_npc.name] > 20
+            friends = player.get_relation(other_npc) > 20
         except KeyError:
             friends = False
         if friends or not player.does_evil():
