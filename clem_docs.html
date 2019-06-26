@@ -19,10 +19,17 @@
             color: orangered;
         }
         span#not {
-            color: red;
+            color: #f32553;
         }
-        span#return {
+        span#return, span#do {
             color: greenyellow;
+        }
+        span#filter {
+            color: deepskyblue;
+        }
+        span#noun {
+            color: hotpink;
+            /* color: deeppink; // This one's too gorgeous it's distracting*/ 
         }
     </style>
 </head>
@@ -36,8 +43,10 @@
     <script>
 
         function split_once(text, delimiter) {
-            var i = text.indexOf(delimiter);
-            var splits = [text.slice(0, i), text.slice(i + 1)];
+            let match = text.match(delimiter);
+            var i = match.index;
+            var e = match.index + match[0].length;
+            var splits = [text.slice(0, i), text.slice(e)];
             return splits;
         }
 
@@ -48,7 +57,11 @@
         function highlight_section(text_string, pattern, id) {
             let match = text_string.match(pattern);
             if (match) {
-                let split_text = text_string.split(match[0]);
+                let split_text = split_once(text_string, match[0]);
+                // recursive replacement
+                if (split_text[1].match(pattern)) {
+                    split_text[1] = highlight_section(split_text[1], pattern, id);
+                }
                 split_text.splice(1, 0, wrap(match[0], id));
                 return split_text.join("")
             }
@@ -69,12 +82,15 @@
 
             // Text
             sections[1] = wrap(sections[1], "text");
+            sections[1] = highlight_section(sections[1], /[A-Z]+\d/, "noun")
+            sections[1] = highlight_section(sections[1], /[A-Z]+\d/, "noun")
 
             // Filters/actions/returns
             for (var s = 2; s < sections.length; s++) {
                 sections[s] = highlight_section(sections[s], /not:/, "not")
                 sections[s] = highlight_section(sections[s], /do:/, "do")
                 sections[s] = highlight_section(sections[s], /return:/, "return")
+                sections[s] = highlight_section(sections[s], /(?:biome|gender|item|weapon|player):/, "filter")
             }
 
             code_block.innerHTML = sections.join("|");
