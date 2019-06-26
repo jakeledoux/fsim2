@@ -16,8 +16,13 @@ re_line_ext = re.compile(r'<([^>]+)>')
 re_end_punct = re.compile(r'[.,!?;]$')
 re_parens_int = re.compile(r'\((\d+)\)')
 re_parens_str = re.compile(r'\((\D+)\)')
+# Gets all parameters inside parenthesis
+re_parens_params = re.compile(r'(?!.+\()([\w.]+)+(?:(?=.+\))|\))')
 
 BASE_PATH = os.path.dirname(os.path.realpath(__file__))
+# Set path for external files if compiled with pyinstaller
+print(os.path.dirname(sys.executable), sys.executable)
+CONFIG_PATH = os.path.dirname(sys.executable) if sys.executable.endswith("fsim2.exe") else BASE_PATH
 
 
 # Exceptions
@@ -77,16 +82,63 @@ def rand_line(*args, **kwargs) -> (str, Dict[str, str]):
     except IndexError:
         player = None
     for action in line.actions:
-        act_type, act_value = action.split(":")
-        if act_type == "consume":
-            if act_value.startswith("ammo"):
-                ammo_amount = get_paren_int(act_value)
-                if kwargs.get('item') is not None:
-                    weapon = kwargs.get('item')
-                else:
-                    weapon = player.get_weapon(['rifle', 'handgun', 'bow'])
-                player.consume_ammo(weapon.ammo_type, ammo_amount)
+        # Surface level actions
+        if action.startswith("countdown"):
+            # Modify existing countdown
+            try:
+                cd_selector, cd_action = action.split(":")
+                [trait_name] = unpack_params(cd_selector)
+                print("Selector, action:", cd_selector, cd_action)
+                if cd_action.startswith("add"):
+                    [amount] = unpack_params(cd_action)
+                    player.get_traits(trait_name)[0].add(amount)
+                elif cd_action.startswith("subtract"):
+                    [amount] = unpack_params(cd_action)
+                    player.get_traits(trait_name)[0].subtract(amount)
+                elif cd_action.startswith("remove"):
+                    player.traits.remove(player.get_traits(trait_name)[0])
+            # Create new countdown
+            except ValueError:
+                name, action, days = unpack_params(action)
+                player.traits.append(Trait(name, True, action, days))
+        elif action.startswith("trait"):
+            # Modify existing countdown
+            try:
+                cd_selector, cd_action = action.split(":")
+                [trait_name] = unpack_params(cd_selector)
+                if cd_action.startswith("remove"):
+                    player.traits.remove(player.get_traits(trait_name)[0])
+            # Create new countdown
+            except ValueError:
+                [name] = unpack_params(action)
+                player.traits.append(Trait(name))
+        # Categorical actions
+        else:
+            act_type, act_value = action.split(":")
+            if act_type == "consume":
+                if act_value.startswith("ammo"):
+                    ammo_amount = get_paren_int(act_value)
+                    if kwargs.get('item') is not None:
+                        weapon = kwargs.get('item')
+                    else:
+                        weapon = player.get_weapon(['rifle', 'handgun', 'bow'])
+                    player.consume_ammo(weapon.ammo_type, ammo_amount)
+            elif act_type == "player":
+                if act_value.startswith("die"):
+                    player.die(announced=True)
     return line.text, line.returns
+
+
+def unpack_params(intext: str) -> List[Union[str, int]]:
+    """
+
+    :param intext: String to extract from. E.g. countdown(poison, poison.die, 10)
+    :return: List of parameters. E.g. ["poison", "poison.die", 10]
+    """
+    # TODO: Add bool and float support
+    params = re_parens_params.findall(intext)
+    params = [int(param) if param.isnumeric() else param for param in params]
+    return params
 
 
 def get_lines(line_id: str, players=None, item=None) -> List[Line]:
@@ -109,30 +161,52 @@ def get_lines(line_id: str, players=None, item=None) -> List[Line]:
                 options = requirement.split("/")
                 sub_results = []
                 for option in options:
+                    # Invert value if not: or !
+                    if option.startswith("!") or option.startswith("not:"):
+                        option = option.replace("!", "").replace("not:", "")
+                        invert = True
+                    else:
+                        invert = False
+
+                    # Store result before potentially inverting it later
+                    sub_result = False
+
                     # Requirements are formatted as "type:value"
                     req_type, req_value = option.split(":", maxsplit=1)
                     if req_type == "biome":
-                        sub_results.append(req_value == player.location.biome.type)
+                        sub_result = req_value == player.location.biome.type
                     elif req_type == "gender":
-                        sub_results.append(req_value == ('female', 'male', 'other')[player.gender])
+                        sub_result = req_value == ('female', 'male', 'other')[player.gender]
                     elif req_type == "weapon":
                         # Look through weapons in inventory and see if any match the specified type
                         if req_value.startswith("loaded"):
                             # Remove loaded keyword
                             req_value = req_value.split(":")[1]
                             # Get loaded weapons matching type
-                            sub_results.append(len(player.usable_weapons([req_value])) > 0)
+                            sub_result = len(player.usable_weapons([req_value])) > 0
                         else:
-                            sub_results.append(any(inv_item.weapon_type == req_value for inv_item in player.inventory
-                                                   if inv_item.is_weapon))
+                            sub_result = any(inv_item.weapon_type == req_value for inv_item in player.inventory
+                                             if inv_item.is_weapon)
                     elif req_type == "item":
                         req_type, req_value = req_value.split(":")
                         if req_type == "weapon":
-                            sub_results.append(item.weapon_type == req_value)
+                            sub_result = item.weapon_type == req_value
                     elif req_type == "player":
                         if req_value in ("arm", "arms", "leg", "legs", "head"):
                             # Limb checks
-                            sub_results.append(player.poll_limbs()[req_value])
+                            sub_result = player.poll_limbs()[req_value]
+                        elif req_value == "limbless":
+                            # Todo ignore head
+                            sub_result = not all(player.poll_limbs())
+                        elif req_value.startswith("trait") or req_value.startswith("countdown"):
+                            [trait_name] = unpack_params(req_value)
+                            sub_result = len(player.get_traits(trait_name)) > 0
+
+                    # Append result
+                    if invert:
+                        sub_results.append(not sub_result)
+                    else:
+                        sub_results.append(sub_result)
                 req_results.append(any(sub_results))
 
             # If all requirement booleans are true,
@@ -353,6 +427,50 @@ class Biome:
                 ['Swamp', 'Mountain', 'Valley', 'Plains', 'Countryside'])
 
 
+class Trait:
+    def __repr__(self):
+        if self.is_countdown:
+            return f"<Countdown Trait: {self.id} | Days: {self.days_left}>"
+        else:
+            return f"<Trait: {self.id}>"
+
+    def __init__(self, trait_id, is_countdown: bool = False, countdown_act: str = "", days: int = -1):
+        """
+        Traits allow meta attributes for characters without requiring physical items.
+
+        :param trait_id: The name of the trait
+        :param is_countdown: Whether the trait is a countdown or static
+        :param countdown_act: What actions to execute once countdown finishes
+        :param days: Days left on countdown
+        """
+        self.id = trait_id
+        self.is_countdown = is_countdown
+        self.countdown_act = countdown_act
+        self.days_left = days
+
+    def add(self, amount: int) -> None:
+        """
+        Extends countdown by a certain amount of days.
+
+        :param amount: Days to extend by
+        """
+        if self.is_countdown:
+            self.days_left += amount
+        else:
+            raise Exception("Cannot add days to non-countdown trait.")
+
+    def subtract(self, amount: int) -> None:
+        """
+        Shortens countdown by a certain amount of days.
+
+        :param amount: Days to extend by
+        """
+        if self.is_countdown:
+            self.days_left -= amount
+        else:
+            raise Exception("Cannot subtract days from non-countdown trait.")
+
+
 class Location:
     def __repr__(self):
         return self.type + ":" + self.name
@@ -517,6 +635,7 @@ class NPC:
         self.boredom: int = random.randrange(20, 40)  # [0-100]
 
         self.inventory: List[Item] = []
+        self.traits: List[Trait] = []
         self.strength = 50 if self.gender == 1 else 40  # How much the NPC can carry without a Container
         self.location: Location = None  # Must be defined before game begins
 
@@ -525,6 +644,7 @@ class NPC:
         self.days_to_live: int = -1  # If positive it will count down until zero, and they will die.
         self.death_message: str = ""
         self.death_day: int = -1
+        self.death_announced = False
 
         self.kills: int = 0
 
@@ -549,6 +669,11 @@ class NPC:
         else:
             self.loneliness += 5 * self.extroversion
 
+        # Increment countdowns
+        for trait in self.traits:
+            if trait.is_countdown:
+                trait.subtract(1)
+
         if self.hunger > 100:
             self.die("NAME1 died of hunger.")
         elif self.thirst > 100:
@@ -572,13 +697,15 @@ class NPC:
         self.death_message = death_message
         self.days_to_live = days
 
-    def die(self, death_message) -> None:
+    def die(self, death_message="", announced=False) -> None:
         """
         Cause player to die.
 
         :param death_message: Message to display upon death. Use :func:`utils.rand_line` instead of hard-coding this.
+        :param announced: Whether it's already been said that the player died.
         """
         self.death_message = death_message
+        self.death_announced = announced
         self.dead = True
         self.location.players.remove(self)
         self.location.containers.append(Container('corpse', self.inventory, f"{self.name}'s corpse"))
@@ -769,6 +896,22 @@ class NPC:
                 output.append(thing)
         return output
 
+    def get_traits(self, trait_id=None) -> List[Trait]:  # Return list of type of Trait in inventory
+        """
+        Gets all traits of trait_id in inventory. Will return all traits if trait_id is ommitted.
+
+        :param trait_id: Trait ID to search for.
+        :return: List of traits matched
+        """
+        if trait_id is None:
+            return self.traits.copy()
+        else:
+            output = []
+            for trait in self.traits:
+                if trait.id == trait_id:
+                    output.append(trait)
+            return output
+
     def does_evil(self, variability=75) -> bool:
         """
         Returns bool deciding whether or not to do an evil thing. Based on kindness formula.
@@ -909,8 +1052,8 @@ def load_mods():
     global lines
     mod_list = [mod.name for mod in os.scandir(os.path.join(BASE_PATH, "mods")) if os.path.isdir(mod)]
     for mod_name in mod_list:
-        mod_dir = os.path.join(BASE_PATH, "mods", mod_name)
-        # Get basic extensionsn
+        mod_dir = os.path.join(CONFIG_PATH, "mods", mod_name)
+        # Get basic extensions
         load_data(mod_dir)
         lines.update(load_lines(mod_dir))
         # Get scripted actions

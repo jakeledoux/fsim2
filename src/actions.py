@@ -19,9 +19,15 @@ def act(player: NPC, universe, debug=0, rage_mode=False) -> List[Tuple[str, NPC]
         print(f"NPC: {player.name} | Hunger: {player.hunger} | Thirst: {player.thirst} | Boredom: {player.boredom} | \
 Arrows: {player.count_ammo('arrow')} | Bullets: {player.count_ammo('bullet')}")
         print(f"Usable weapons: {player.usable_weapons()}")
+        print(f"Traits: {player.traits}")
     options = get_options(player)
 
     involved_players = []
+
+    # TODO: Multiple-player bored actions (with regard to location of players)
+    # TODO: Trait integer value
+    # TODO: Procedural generation in Clem (random first name, random age, etc)
+
 
     # SCORE OPTIONS ####################################################################################################
     # Weigh and score options // Int - ~[0-100]
@@ -75,6 +81,15 @@ Arrows: {player.count_ammo('arrow')} | Bullets: {player.count_ammo('bullet')}")
 
     # EXECUTE OPTION ###################################################################################################
     action = options[min(max(random.randrange(-1, 2), 0), len(options) - 1)]
+
+    # Check finished countdowns:
+    for trait in player.traits:
+        if trait.is_countdown:
+            if trait.days_left < 0:
+                action = {"action": "finished_countdown", "object": trait.countdown_act}
+                player.traits.remove(trait)
+                break
+
     if action["action"] == "eat":
         printd(
             f"NAME1 eats {color(player.eat(), Style.BRIGHT + Fore.CYAN)}.", [player])
@@ -106,9 +121,15 @@ Arrows: {player.count_ammo('arrow')} | Bullets: {player.count_ammo('bullet')}")
 
     elif action["action"] == "entertain":
         # TODO: Entertainment actions, the meat of the game
-        # printd("NAME1 acts like a big stupid clown.", [player])
+        # JACOB YOU SON OF A BITCH DO NOT JUST USE A GODDAMN RAND_LINE CALL YOU FUCKING MORON
+        # I SWEAR TO GOD
+        #
+        # CHANGE IT, YOU LAZY FUCK.
         printd(rand_line("entertain.bored", [player]), [player])
         player.boredom = max(player.boredom - random.randrange(10, 30), 0)
+
+    elif action["action"] == "finished_countdown":
+        printd(rand_line(action["object"], [player]), [player])
 
     # Scripted actions
     elif action["action"] == "scripted":
@@ -128,7 +149,7 @@ Arrows: {player.count_ammo('arrow')} | Bullets: {player.count_ammo('bullet')}")
     return involved_players
 
 
-def get_options(player: NPC) -> List[Dict[str, Union[Item, NPC]]]:
+def get_options(player: NPC) -> List:
     options = []
     # See if eating/drinking are options
     for item in player.inventory:
@@ -164,6 +185,7 @@ def get_options(player: NPC) -> List[Dict[str, Union[Item, NPC]]]:
         if person != player and not person.unconscious:
             options.append({"action": "socialize", "object": person})
             options.append({"action": "attack", "object": person})
+
 
     # Travel
     options.append({"action": "travel"})

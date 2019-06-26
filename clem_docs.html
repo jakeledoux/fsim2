@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Clem Templating Language Documentation</title>
+    <style>
+        code {
+            background: #222f33;
+            margin: 0.5em 0;
+            padding: 0.5em;
+            color: #fbfbfb;
+            display: inline-block;
+            border-radius: 10px;
+        }
+
+        span#prompt {
+            color: orangered;
+        }
+        span#not {
+            color: red;
+        }
+        span#return {
+            color: greenyellow;
+        }
+    </style>
+</head>
+<body>
+    <h1>Clem Templating Language Documentation</h1>
+    <p>Clem statements are broken up into three sections: the prompt, the text, and the fine-print. Here are two examples of what a Clem line may look like:<br>
+        <code>entertain.bored | NAME1 gets bit by a snake &lt;and is now poisoned&gt;. | not:player:countdown(poison) | do:countdown(poison, traits.poison.die, 10)</code>
+        <code>entertain.bored | NAME1 murders HIS1 imaginary friend in its sleep. | player:trait(imaginary_friend) | do:trait(imaginary_friend):remove</code>
+    </p>
+
+    <script>
+
+        function split_once(text, delimiter) {
+            var i = text.indexOf(delimiter);
+            var splits = [text.slice(0, i), text.slice(i + 1)];
+            return splits;
+        }
+
+        function wrap(text_string, id) {
+            return "<span id='" + id + "'>" + text_string + "</span>";
+        }
+
+        function highlight_section(text_string, pattern, id) {
+            let match = text_string.match(pattern);
+            if (match) {
+                let split_text = text_string.split(match[0]);
+                split_text.splice(1, 0, wrap(match[0], id));
+                return split_text.join("")
+            }
+            else {
+                return text_string
+            }
+        }
+
+        // Syntax highlighting
+        var code_blocks = document.getElementsByTagName("code");
+        for (var i = 0; i < code_blocks.length; i++) {
+            let code_block = code_blocks[i];
+            // console.log(code_block.innerText);
+            let sections = code_block.innerHTML.split("|");
+
+            // Prompt
+            sections[0] = wrap(sections[0], "prompt");
+
+            // Text
+            sections[1] = wrap(sections[1], "text");
+
+            // Filters/actions/returns
+            for (var s = 2; s < sections.length; s++) {
+                sections[s] = highlight_section(sections[s], /not:/, "not")
+                sections[s] = highlight_section(sections[s], /do:/, "do")
+                sections[s] = highlight_section(sections[s], /return:/, "return")
+            }
+
+            code_block.innerHTML = sections.join("|");
+        }
+    </script>
+</body>
+</html>

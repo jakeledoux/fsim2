@@ -1,13 +1,13 @@
 from typing import List, Tuple
 
-import utils
 import actions
+import utils
 
 # CONFIGS ###################################################
 # TODO: Move this to a config file
-DEBUG_PRINTS = 0  # 0: Nothing, 1: Player states, 2: Decision scores
+DEBUG_PRINTS = 1  # 0: Nothing, 1: Player states, 2: Decision scores
 DEBUG_SPEED = 0  # 0: Normal gameplay, 1: Skip death-less recaps, 2: Skip recaps, 3: Wait for death, 4: Skip everything
-MODS_ENABLED = False
+MODS_ENABLED = True
 RAGE_MODE = False
 ONE_IN_THE_CHAMBER = False
 WORLD_SIZE = 1
@@ -17,6 +17,7 @@ WORLD_SIZE = 1
 if MODS_ENABLED:
     utils.load_mods()
 #############################################################
+
 
 # INSTANTIATE GAME WORLD ####################################
 while True:
@@ -30,6 +31,7 @@ while True:
         if ONE_IN_THE_CHAMBER:
             player.pickup(utils.Item("pistol"))
             player.pickup(utils.Item("bullet"))
+    utils.printd(utils.rand_line("test.poison", [universe.players[0]]), [universe.players[0]])
 
     # GAME LOOP #################################################
     while True:
@@ -53,13 +55,14 @@ while True:
                 if player in skip_players:
                     continue
 
-                # Remove dead player
+                # Remove dead player pre-turn
                 player.step()
                 if player.dead:
                     universe.players.remove(player)
                     funeral_parlor.append(player)
                     player.death_day = universe.day
-                    utils.printd(player.death_message, [player])
+                    if not player.death_announced:
+                        utils.printd(player.death_message, [player])
                     continue
                 elif player.unconscious:
                     if utils.random.randrange(2):
@@ -83,6 +86,14 @@ while True:
                             elif inv_reason == "attack":
                                 if inv_player.unconscious:
                                     skip_players.append(inv_player)
+
+                # Post turn
+                if player.dead and player.death_announced:
+                    universe.players.remove(player)
+                    funeral_parlor.append(player)
+                    player.death_day = universe.day
+                    if not player.death_announced:
+                        utils.printd(player.death_message, [player])
 
                 print()  # Creates newline, should be removed when GUI is worked on.
         if not DEBUG_SPEED >= 3:

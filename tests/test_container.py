@@ -1,5 +1,5 @@
 from unittest import TestCase
-from utils import Container, load_csv
+from src.utils import Container, load_csv
 
 containers = load_csv("containers")
 names = load_csv("nouns")

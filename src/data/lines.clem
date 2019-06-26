@@ -3,7 +3,7 @@
 # Line ID | Line text (<blah> for optional text, <nah/sure/whatever> for random choices, {x} for variables)| [requirements...] (1/2 for either/or requirements)
 
 ##### PLEASE END ALL TEXT SECTIONS WITH PUNCTUATION! ##########################################################################################################
-(Jake) [
+(Jake)
 	(Status) [
 		status.knockout | NAME1 is knocked unconscious.
 		status.unconscious | NAME1 is still unconscious.
