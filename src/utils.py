@@ -1103,7 +1103,7 @@ def load_settings(*directory) -> Dict[str, int]:
 def load_mods():
     global scripts
     global lines
-    mod_list = [mod.name for mod in os.scandir(os.path.join(BASE_PATH, "mods")) if os.path.isdir(mod)]
+    mod_list = [mod.name for mod in os.scandir(os.path.join(CONFIG_PATH, "mods")) if os.path.isdir(mod)]
     for mod_name in mod_list:
         mod_dir = os.path.join(CONFIG_PATH, "mods", mod_name)
         # Get basic extensions

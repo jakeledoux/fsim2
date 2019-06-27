@@ -25,7 +25,6 @@ while True:
         if settings["ONE_IN_THE_CHAMBER"]:
             player.pickup(utils.Item("pistol"))
             player.pickup(utils.Item("bullet"))
-    utils.printd(utils.rand_line("test.poison", [universe.players[0]]), [universe.players[0]])
 
     # GAME LOOP #################################################
     while True:
