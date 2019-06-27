@@ -61,6 +61,17 @@
 		entertain.bored | NAME1 practices HIS1 aim on a target. | weapon:loaded:handgun/weapon:loaded:rifle/weapon:loaded:bow | player:arm | do:consume:ammo(1)
 		# BIG STUPID CLOWN IS A PLACEHOLDER, YA DUMMY
 		entertain.bored | NAME1 acts like a big stupid clown.
+		test.poison | NAME1 gets bit by a snake <and is now poisoned>. | do:countdown(poison, traits.poison.die, 2)
+		entertain.bored | NAME1 gets bit by a snake <and is now poisoned>. | not:player:countdown(poison) | do:countdown(poison, traits.poison.die, 10)
+		entertain.bored | NAME1 pees on the bite. | player:countdown(poison) | do:countdown(poison):add(10)
+		entertain.bored | NAME1 cuts off HIS1 leg to remove the poison. | player:countdown(poison) | do:countdown(poison):remove
+		entertain.bored | NAME1 meets an imaginary friend. | not:player:trait(imaginary_friend) | do:trait(imaginary_friend)
+		entertain.bored | NAME1 laughs at a joke HIS1 imaginary friend told HIM1. | player:trait(imaginary_friend)
+		entertain.bored | NAME1 murders HIS1 imaginary friend in its sleep. | player:trait(imaginary_friend) | do:trait(imaginary_friend):remove
+		entertain.random | NAME1 acts like a big stupid clown.
+	]
+	(Traits) [
+		traits.poison.die | NAME1 dies from the poison. | do:player:die
 	]
 	(Meta) [
 		meta.day_end | End of day {day}.
@@ -69,4 +80,7 @@
 		meta.people_died | Let us remember those who have passed on this day:
 		meta.people_died | These brave souls have died today:
 	]
+]
+(Mezrah) [
+
 ]
