@@ -8,6 +8,7 @@ malleable, the codebase is lights, and there are lots of really important decisi
 to made. In other words, this is a really fun time to join.
 
 [Clem syntax and practices documentation](https://jakeledoux.github.io/fsim2/clem_docs)
+
 [Utils library documentation](https://jakeledoux.github.io/fsim2/build/html/utils.html#module-utils)
 
 More information to follow. 
