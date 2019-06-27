@@ -140,11 +140,11 @@ def unpack_params(intext: str) -> List[Union[str, int]]:
     return params
 
 
-def get_lines(line_id: str, players=None, item=None) -> List[Line]:
+def get_lines(line_id: Union[str, Tuple[str]], players=None, item=None) -> List[Line]:
     """
     Filters game lines by line_id and requirements.
 
-    :param line_id: The category of text to look for in the list.
+    :param line_id: The prompt to look for in the list. (Can be tuple of prompts)
     :param players: List of players relevant to this line. If omitted it will only return lines that don't have filters.
     :param item: For specific filters based on single objects selected by the game.
     :return: List of line objects meeting criteria.
@@ -152,8 +152,12 @@ def get_lines(line_id: str, players=None, item=None) -> List[Line]:
     # Most filtering will be based on subject player
     player: NPC = players[0] if players is not None else None
     out_lines = []
+    if type(line_id) == tuple:
+        relevant_lines = (line for li_id in line_id for line in lines[li_id])
+    else:
+        relevant_lines = lines[line_id]
     # Iterate through all lines with same line_id (line_ids look like "drink.desperation")
-    for line in lines[line_id]:
+    for line in relevant_lines:
         req_results = []  # List with booleans, one for each requirement.
         if player is not None:
             for requirement in line.requirements:

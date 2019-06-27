@@ -125,7 +125,7 @@ Arrows: {player.count_ammo('arrow')} | Bullets: {player.count_ammo('bullet')}")
         # I SWEAR TO GOD
         #
         # CHANGE IT, YOU LAZY FUCK.
-        printd(rand_line("entertain.bored", [player]), [player])
+        printd(rand_line(("entertain.bored", "entertain.random"), [player]), [player])
         player.boredom = max(player.boredom - random.randrange(10, 30), 0)
 
     elif action["action"] == "finished_countdown":
