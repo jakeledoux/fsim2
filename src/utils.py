@@ -260,6 +260,41 @@ def clear():
     os.system("cls" if os.name == "nt" else "clear")
 
 
+def nest_split(intext, opening, closing, recursive=False):
+    level = 0
+    start_idx, end_idx = -1, -1
+    for idx, char in enumerate(intext):
+        if char == opening:
+            if level == 0:
+                start_idx = idx
+            level += 1
+        elif char == closing:
+            level -= 1
+            if level == 0:
+                end_idx = idx
+                break
+    if start_idx == -1 or end_idx == -1:
+        raise Exception("There are no complete opening/closing sets")
+    else:
+        output = intext.split(intext[start_idx:end_idx + 1])
+        output.insert(0, intext[start_idx + 1:end_idx])
+        if recursive and re_line_op.search(output[0]):
+            output[0] = nest_split(output[0], opening, closing, True)
+        return output
+
+
+def shallow_split(intext: str, delimiter, opening, closing):
+    level = 0
+    for idx, char in enumerate(intext):
+        if char == opening:
+            level += 1
+        elif char == closing:
+            level -= 1
+        elif char == delimiter and level == 0:
+            return intext[:idx].strip(), intext[idx + 1:].strip()
+    return [intext]
+
+
 def printd(intext, players=(), trailing=False, leading=False, **kwargs):
     """ I still don't know why I originally called it printd instead of printf.
         The world may never know.
@@ -273,11 +308,8 @@ def printd(intext, players=(), trailing=False, leading=False, **kwargs):
     # Get both ends of string with pattern removed
     # While there are patterns in the text
     while re_line_op.search(intext):
-        sections = re_line_op.split(intext, maxsplit=1)
-        # Get pattern
-        options = re_line_ext.search(intext).group(1)
-        # Split into list of parts
-        options = [option.strip() for option in options.split("/") if option.strip() != ""]
+        options, *sections = nest_split(intext, "<", ">")
+        options = list(shallow_split(options, "/", "<", ">"))
         if len(options) == 1:
             # If the pattern has no slashes it's optional, not a choice
             options.append("")
