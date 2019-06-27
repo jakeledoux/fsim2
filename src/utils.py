@@ -21,7 +21,6 @@ re_parens_params = re.compile(r'(?!.+\()([\w.]+)+(?:(?=.+\))|\))')
 
 BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 # Set path for external files if compiled with pyinstaller
-print(os.path.dirname(sys.executable), sys.executable)
 CONFIG_PATH = os.path.dirname(sys.executable) if sys.executable.endswith("fsim2.exe") else BASE_PATH
 
 
@@ -1044,6 +1043,28 @@ def load_data(*directory):
         pronoun_list.update(load_csv(os.path.join(path, "pronouns.csv")))
     if os.path.exists(os.path.join(path, "nouns.csv")):
         nouns.update(load_csv(os.path.join(path, "nouns.csv")))
+
+
+def load_settings(*directory) -> Dict[str, int]:
+    """ Loads settings from directory.
+
+    :param directory: String arguments that form a path
+    """
+    if len(directory) == 0:
+        path = CONFIG_PATH
+    else:
+        path = os.path.join(*directory)
+    params = {}
+    if os.path.exists(os.path.join(path, "settings.ini")):
+        with open(os.path.join(path, "settings.ini"), "r") as f:
+            for line in f.read().splitlines():
+                if line.strip().startswith("#") or line.strip() == "":
+                    continue
+                p_name, p_value = [p.strip() for p in line.split("=")]
+                params[p_name] = int(p_value)
+    else:
+        raise Exception(f"settings.ini not found in {path}")
+    return params
 
 
 # Load mods

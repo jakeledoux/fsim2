@@ -4,31 +4,25 @@ import actions
 import utils
 
 # CONFIGS ###################################################
-# TODO: Move this to a config file
-DEBUG_PRINTS = 1  # 0: Nothing, 1: Player states, 2: Decision scores
-DEBUG_SPEED = 0  # 0: Normal gameplay, 1: Skip death-less recaps, 2: Skip recaps, 3: Wait for death, 4: Skip everything
-MODS_ENABLED = True
-RAGE_MODE = False
-ONE_IN_THE_CHAMBER = False
-WORLD_SIZE = 1
+settings = utils.load_settings()
 #############################################################
 
 # LOAD GAME DATA ############################################
-if MODS_ENABLED:
+if settings["MODS_ENABLED"]:
     utils.load_mods()
 #############################################################
 
 
 # INSTANTIATE GAME WORLD ####################################
 while True:
-    universe = utils.World(WORLD_SIZE, WORLD_SIZE)
+    universe = utils.World(settings["WORLD_SIZE"], settings["WORLD_SIZE"])
     universe.players.append(utils.NPC('Jamie', 1))
     universe.players.append(utils.NPC('Barbara', 0))
     universe.players.append(utils.NPC('Steph', 0))
 
     for player in universe.players:  # Populate players
         player.random_location(universe)
-        if ONE_IN_THE_CHAMBER:
+        if settings["ONE_IN_THE_CHAMBER"]:
             player.pickup(utils.Item("pistol"))
             player.pickup(utils.Item("bullet"))
     utils.printd(utils.rand_line("test.poison", [universe.players[0]]), [universe.players[0]])
@@ -72,7 +66,8 @@ while True:
                         utils.printd(utils.rand_line("status.unconscious", [player]), [player])
                 else:
                     # Do turn
-                    involved_players = actions.act(player, universe, debug=DEBUG_PRINTS, rage_mode=RAGE_MODE)
+                    involved_players = actions.act(player, universe, debug=settings["DEBUG_PRINTS"],
+                                                   rage_mode=settings["RAGE_MODE"])
 
                     # Remove involved players from turn-pool
                     for inv_reason, inv_player in involved_players:
@@ -96,7 +91,7 @@ while True:
                         utils.printd(player.death_message, [player])
 
                 print()  # Creates newline, should be removed when GUI is worked on.
-        if not DEBUG_SPEED >= 3:
+        if not settings["DEBUG_SPEED"] >= 3:
             # This is where you'd put the call to flush text contents if working with a GUI.
             input("Press enter...")
 
@@ -110,9 +105,9 @@ while True:
                 utils.printd(utils.rand_line("meta.people_died"))
             for body in funeral_parlor:
                 utils.printd(body.obituary(), [body])
-            if DEBUG_SPEED == 0 or (DEBUG_SPEED in (1, 3) and len(funeral_parlor) > 0):
+            if settings["DEBUG_SPEED"] == 0 or (settings["DEBUG_SPEED"]in (1, 3) and len(funeral_parlor) > 0):
                 input("Press enter...")
     # Play again?
-    if DEBUG_SPEED < 4:
+    if settings["DEBUG_SPEED"]< 4:
         break
 #############################################################
