@@ -7,7 +7,7 @@ However, if you're interested in contributing then now's the perfect time. The g
 malleable, the codebase is lights, and there are lots of really important decisions still yet
 to made. In other words, this is a really fun time to join.
 
-Documentation is sparse to non-existent, but now that things are starting to become more
-concrete the quality of documentation will go up quite a bit.
+[Clem syntax and practices documentation](https://jakeledoux.github.io/fsim2/clem_docs)
+[Utils library documentation](https://jakeledoux.github.io/fsim2/build/html/utils.html#module-utils)
 
 More information to follow. 
