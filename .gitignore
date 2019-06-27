@@ -2,3 +2,4 @@ activate.bat
 __pycache__
 *.pyc
 unloaded_mods
+venv
