@@ -3,3 +3,7 @@ __pycache__
 *.pyc
 unloaded_mods
 venv
+*.zip
+build
+.idea
+dist
