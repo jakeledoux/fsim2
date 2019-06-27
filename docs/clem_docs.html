@@ -46,6 +46,12 @@
             padding: 0.5em;
             display: inline-block;
         }
+    
+        span.not-implemented{
+            background: #f32553;
+            color: white;
+            padding: 0 10px
+        }
 
         span#prompt {
             color: orangered;
@@ -338,6 +344,10 @@
             <tr>
                 <td><code sec="2">do:player:die</code></td>
                 <td>Causes the player to die.</td>
+            </tr>
+            <tr>
+                <td><code sec="2">do:achievement({achievement})</code></td>
+                <td>Grant achievement through whatever game service the real-life user is running the game on. (Steam, Itch, Gamejolt, etc) <span class="not-implemented">NYI</span></td>
             </tr>
         </table>
     </div>
