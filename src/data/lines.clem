@@ -74,8 +74,10 @@
 		traits.poison.die | NAME1 dies from the poison. | do:player:die
 	]
 	(Meta) [
-		meta.day_end | End of day {day}.
-		meta.day_end | The sun sets on day {day}.
+		meta.day_end | End of [green] Day {day}.
+		meta.day_end | The sun sets on [green] Day {day}.
+		meta.day_start | Dawn of [green] Day {day}.
+		meta.day_start | The sun rises on [green] Day {day}.
 		meta.everyone_survived | <The population/Everyone> lives to see another <sunrise/morning>.
 		meta.people_died | Let us remember those who have passed on this day:
 		meta.people_died | These brave souls have died today:

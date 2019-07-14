@@ -20,10 +20,16 @@ re_parens_str = re.compile(r'\((\D+)\)')
 re_parens_params = re.compile(r'(?!.+\()([\w.]+)+(?:(?=.+\))|\))')
 # Colorama command finder
 re_colorama = re.compile(r'(\x1b\[\d+m)')
+re_color_ident = re.compile(r'\[(\w+)\] ?')
 
 BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 # Set path for external files if compiled with pyinstaller
 CONFIG_PATH = os.path.dirname(sys.executable) if sys.executable.endswith("fsim2.exe") else BASE_PATH
+
+
+COLORS = {"reset": Style.RESET_ALL, "bright": Style.BRIGHT, "dim": Style.DIM,
+          "black": Fore.BLACK, "red": Fore.RED, "green": Fore.GREEN, "yellow": Fore.YELLOW,
+          "blue": Fore.BLUE, "magenta": Fore.MAGENTA, "cyan": Fore.CYAN, "white": Fore.WHITE}
 
 
 # Exceptions
@@ -327,6 +333,11 @@ def printd(intext, players=(), trailing=False, leading=False, **kwargs):
         intext = re.sub(' +', ' ', intext)
         # Remove spaces before punctuation
         intext = re.sub(' ([.,!?;])', r'\1', intext)
+
+    while re_color_ident.search(intext):
+        print(intext)
+        color_name = re_color_ident.search(intext).group(1)
+        intext = re_color_ident.sub(COLORS[color_name], intext)
 
     # Substitute names
     try:
