@@ -4,7 +4,7 @@ This project is currently pre-alpha, and though it's technically playable it's n
 entertaining. If you're interested in playing, please check back in a few weeks/months.
 
 However, if you're interested in contributing then now's the perfect time. The game is still
-malleable, the codebase is lights, and there are lots of really important decisions still yet
+malleable, the codebase is light, and there are lots of really important decisions still yet
 to made. In other words, this is a really fun time to join.
 
 [Clem syntax and practices documentation](https://jakeledoux.github.io/fsim2/clem_docs)
