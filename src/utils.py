@@ -18,6 +18,8 @@ re_parens_int = re.compile(r'\((\d+)\)')
 re_parens_str = re.compile(r'\((\D+)\)')
 # Gets all parameters inside parenthesis
 re_parens_params = re.compile(r'(?!.+\()([\w.]+)+(?:(?=.+\))|\))')
+# Colorama command finder
+re_colorama = re.compile(r'(\x1b\[\d+m)')
 
 BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 # Set path for external files if compiled with pyinstaller
@@ -261,7 +263,8 @@ def load_lines(*directory) -> Dict[str, List[Line]]:
 
 def clear():
     """ Clears terminal."""
-    os.system("cls" if os.name == "nt" else "clear")
+    # os.system("cls" if os.name == "nt" else "clear")
+    terminal.clear()
 
 
 def nest_split(intext, opening, closing, recursive=False):
@@ -295,7 +298,7 @@ def shallow_split(intext: str, delimiter, opening, closing):
         elif char == closing:
             level -= 1
         elif char == delimiter and level == 0:
-            return intext[:idx].strip(), intext[idx + 1:].strip()
+            return [intext[:idx].strip()] + shallow_split(intext[idx + 1:].strip(), delimiter, opening, closing)
     return [intext]
 
 
@@ -354,7 +357,7 @@ def printd(intext, players=(), trailing=False, leading=False, **kwargs):
     try:
         intext = intext.format(**kwargs)
     except KeyError as e:
-        raise KeyError("Keyword argument '{e.args[0]}' was not provided for formatting.")
+        raise KeyError(f"Keyword argument '{e.args[0]}' was not provided for formatting.")
 
     # Trailing periods
     if trailing:
@@ -364,7 +367,11 @@ def printd(intext, players=(), trailing=False, leading=False, **kwargs):
         intext = "    ..." + intext[0].lower() + intext[1:]
 
     # Output formatted string
-    print(intext)
+    # print(intext)
+    if terminal is not None:
+        terminal.println(intext)
+    else:
+        print(intext)
 
     # Return line's return arguments
     return line_returns
@@ -1134,3 +1141,5 @@ pronoun_list = dict()
 nouns = dict()
 scripts = dict()
 load_data(BASE_PATH, "data")
+
+terminal = None
