@@ -81,6 +81,7 @@
 		meta.everyone_survived | <The population/Everyone> lives to see another <sunrise/morning>.
 		meta.people_died | Let us remember those who have passed on this day:
 		meta.people_died | These brave souls have died today:
+		meta.credits | [bright][magenta] Jake Ledoux [reset] - Creative Director, Programmer, Writer%[bright][magenta] Mezrah Masada [reset] - Writer
 	]
 ]
 (Mezrah) [

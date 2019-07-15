@@ -308,6 +308,13 @@ def shallow_split(intext: str, delimiter, opening, closing):
     return [intext]
 
 
+def parse_color(intext):
+    while re_color_ident.search(intext):
+        color_name = re_color_ident.search(intext).group(1)
+        intext = re_color_ident.sub(COLORS[color_name], intext, count=1)
+    return intext
+
+
 def printd(intext, players=(), trailing=False, leading=False, **kwargs):
     """ I still don't know why I originally called it printd instead of printf.
         The world may never know.
@@ -334,10 +341,7 @@ def printd(intext, players=(), trailing=False, leading=False, **kwargs):
         # Remove spaces before punctuation
         intext = re.sub(' ([.,!?;])', r'\1', intext)
 
-    while re_color_ident.search(intext):
-        print(intext)
-        color_name = re_color_ident.search(intext).group(1)
-        intext = re_color_ident.sub(COLORS[color_name], intext)
+    intext = parse_color(intext)
 
     # Substitute names
     try:
